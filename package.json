@@ -8,7 +8,13 @@
     "start:once": "node src/index.js --once",
     "dry-run": "node src/index.js --dry-run --once",
     "check": "node -e \"require('./src/index.js')\"",
-    "encrypt:key": "node scripts/encrypt-env.js"
+    "encrypt:key": "node scripts/encrypt-env.js",
+    "test": "jest --verbose",
+    "test:ci": "jest --ci --coverage",
+    "lint": "eslint src/ test/ scripts/",
+    "lint:fix": "eslint src/ test/ scripts/ --fix",
+    "format": "prettier --write 'src/**/*.js' 'test/**/*.js' 'scripts/**/*.js'",
+    "format:check": "prettier --check 'src/**/*.js' 'test/**/*.js' 'scripts/**/*.js'"
   },
   "repository": {
     "type": "git",
@@ -26,6 +32,9 @@
   ],
   "author": "",
   "license": "ISC",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "bugs": {
     "url": "https://github.com/Disseveru/1st-cursor-dapp/issues"
   },
@@ -41,5 +50,11 @@
     "pino": "^10.3.1",
     "web3": "^1.10.4",
     "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "eslint": "^10.0.1",
+    "eslint-config-prettier": "^10.1.8",
+    "jest": "^30.2.0",
+    "prettier": "^3.8.1"
   }
 }

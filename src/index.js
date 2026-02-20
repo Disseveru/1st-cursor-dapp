@@ -10,6 +10,7 @@ const { SpellBuilder } = require("./spellBuilder");
 const { FlashbotsExecutor } = require("./flashbotsExecutor");
 const { ExecutionEngine } = require("./executionEngine");
 const { AvocadoBalanceFetcher } = require("./avocadoBalanceFetcher");
+const { StatusReporter } = require("./statusReporter");
 const { SearcherBot } = require("./bot");
 
 function parseFlags(argv) {
@@ -28,9 +29,7 @@ async function bootstrap() {
   const providers = createProviderMap(config.providers.chainRpcUrls);
   const mainProvider = providers[1];
   if (!mainProvider) {
-    throw new Error(
-      "Mainnet provider missing. Configure ETHEREUM_RPC_URL or CHAIN_RPC_JSON[1].",
-    );
+    throw new Error("Mainnet provider missing. Configure ETHEREUM_RPC_URL or CHAIN_RPC_JSON[1].");
   }
 
   const { dsa, signerAddress } = await createInstadappClient({
@@ -98,6 +97,8 @@ async function bootstrap() {
     logger,
   });
 
+  const statusReporter = new StatusReporter({ logger });
+
   const bot = new SearcherBot({
     config,
     mainProvider,
@@ -105,19 +106,25 @@ async function bootstrap() {
     liquidationMonitor,
     crossChainMonitor,
     executionEngine,
+    statusReporter,
     logger,
   });
 
-  process.on("SIGINT", async () => {
-    logger.warn("SIGINT received, shutting down");
+  let shuttingDown = false;
+  async function gracefulShutdown(signal) {
+    if (shuttingDown) return;
+    shuttingDown = true;
+    logger.warn({ signal }, "Signal received, initiating graceful shutdown");
+    const forceTimeout = setTimeout(() => {
+      logger.error("Forced exit after shutdown timeout");
+      process.exit(1);
+    }, 35000);
+    forceTimeout.unref();
     await bot.stop();
     process.exit(0);
-  });
-  process.on("SIGTERM", async () => {
-    logger.warn("SIGTERM received, shutting down");
-    await bot.stop();
-    process.exit(0);
-  });
+  }
+  process.on("SIGINT", () => gracefulShutdown("SIGINT"));
+  process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
 
   await bot.start();
 }

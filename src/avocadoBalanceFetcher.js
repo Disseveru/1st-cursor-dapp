@@ -34,10 +34,10 @@ class AvocadoBalanceFetcher {
       this.ethers5 = ethers5;
 
       setRpcUrls(this.chainRpcUrls);
-      const provider = new ethers5.providers.StaticJsonRpcProvider(
-        this.avocadoRpcUrl,
-        { chainId: 634, name: "avocado" },
-      );
+      const provider = new ethers5.providers.StaticJsonRpcProvider(this.avocadoRpcUrl, {
+        chainId: 634,
+        name: "avocado",
+      });
 
       const wallet = new ethers5.Wallet(this.privateKey, provider);
       this.safe = createSafe(wallet);
@@ -104,10 +104,7 @@ class AvocadoBalanceFetcher {
 
       return balances;
     } catch (error) {
-      this.logger.warn(
-        { error: error.message },
-        "Unable to fetch Avocado cross-chain balances",
-      );
+      this.logger.warn({ error: error.message }, "Unable to fetch Avocado cross-chain balances");
       return null;
     }
   }

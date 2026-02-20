@@ -6,6 +6,7 @@ class SearcherBot {
     liquidationMonitor,
     crossChainMonitor,
     executionEngine,
+    statusReporter,
     logger,
   }) {
     this.config = config;
@@ -14,11 +15,14 @@ class SearcherBot {
     this.liquidationMonitor = liquidationMonitor;
     this.crossChainMonitor = crossChainMonitor;
     this.executionEngine = executionEngine;
+    this.statusReporter = statusReporter || null;
     this.logger = logger;
     this.running = false;
     this.inFlight = false;
     this.interval = null;
     this.blockListener = null;
+    this.statusInterval = null;
+    this.shutdownTimeoutMs = config.app.shutdownTimeoutMs || 30000;
   }
 
   rankOpportunities(opportunities) {
@@ -39,6 +43,8 @@ class SearcherBot {
 
       const safeToRun = await this.executionEngine.checkKillSwitch();
       if (!safeToRun) {
+        this.statusReporter?.recordKillSwitch();
+        this.inFlight = false;
         await this.stop();
         return;
       }
@@ -49,11 +55,9 @@ class SearcherBot {
         this.crossChainMonitor.scan(),
       ]);
 
-      const opportunities = this.rankOpportunities([
-        ...arbOpps,
-        ...liqOpps,
-        ...crossOpps,
-      ]);
+      const opportunities = this.rankOpportunities([...arbOpps, ...liqOpps, ...crossOpps]);
+      this.statusReporter?.recordCycle();
+      this.statusReporter?.recordOpportunitiesFound(opportunities.length);
 
       if (!opportunities.length) {
         this.logger.debug("No executable opportunities in this cycle");
@@ -72,10 +76,15 @@ class SearcherBot {
 
         try {
           const result = await this.executionEngine.executeOpportunity(opp);
-          if (result?.executed || result?.reason === "dry-run") {
+          if (result?.executed) {
+            this.statusReporter?.recordExecution(opp.label);
+            break;
+          }
+          if (result?.reason === "dry-run") {
             break;
           }
         } catch (error) {
+          this.statusReporter?.recordError();
           this.logger.warn(
             { label: opp.label, error: error.message },
             "Opportunity execution attempt failed",
@@ -83,10 +92,8 @@ class SearcherBot {
         }
       }
     } catch (error) {
-      this.logger.error(
-        { error: error.message, stack: error.stack },
-        "Cycle failed",
-      );
+      this.statusReporter?.recordError();
+      this.logger.error({ error: error.message, stack: error.stack }, "Cycle failed");
     } finally {
       this.inFlight = false;
     }
@@ -94,9 +101,11 @@ class SearcherBot {
 
   async start() {
     this.running = true;
+    this.statusReporter?.start();
 
     if (this.config.app.once) {
       await this.runCycle("once");
+      this.statusReporter?.logStatus();
       this.running = false;
       return;
     }
@@ -112,6 +121,11 @@ class SearcherBot {
     this.interval = setInterval(async () => {
       await this.runCycle("interval");
     }, this.config.app.pollIntervalMs);
+
+    const statusIntervalMs = this.config.app.statusIntervalMs || 60000;
+    this.statusInterval = setInterval(() => {
+      this.statusReporter?.logStatus();
+    }, statusIntervalMs);
 
     this.logger.info(
       { intervalMs: this.config.app.pollIntervalMs },
@@ -135,6 +149,23 @@ class SearcherBot {
       this.blockListener = null;
     }
 
+    if (this.statusInterval) {
+      clearInterval(this.statusInterval);
+      this.statusInterval = null;
+    }
+
+    if (this.inFlight) {
+      this.logger.info("Waiting for in-flight cycle to complete before shutdown...");
+      const deadline = Date.now() + (this.shutdownTimeoutMs || 30000);
+      while (this.inFlight && Date.now() < deadline) {
+        await new Promise((r) => setTimeout(r, 200));
+      }
+      if (this.inFlight) {
+        this.logger.warn("Shutdown deadline reached with cycle still in-flight");
+      }
+    }
+
+    this.statusReporter?.logStatus();
     this.logger.warn("Searcher bot stopped");
   }
 }

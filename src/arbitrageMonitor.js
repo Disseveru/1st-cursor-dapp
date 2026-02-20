@@ -8,11 +8,7 @@ function enabledSources(sources = {}) {
 }
 
 class ArbitrageMonitor {
-  constructor({
-    config,
-    quoter,
-    logger,
-  }) {
+  constructor({ config, quoter, logger }) {
     this.config = config;
     this.quoter = quoter;
     this.logger = logger;
@@ -138,10 +134,7 @@ class ArbitrageMonitor {
       return null;
     }
 
-    const expectedProfitEthWei = await this.convertProfitToEth(
-      pair,
-      bestRoute.profitWei,
-    );
+    const expectedProfitEthWei = await this.convertProfitToEth(pair, bestRoute.profitWei);
 
     return {
       type: "arbitrage",

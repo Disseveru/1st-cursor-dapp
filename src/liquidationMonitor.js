@@ -6,16 +6,10 @@ const AAVE_V3_POOL_ABI = [
 const COMPOUND_V2_COMPTROLLER_ABI = [
   "function getAccountLiquidity(address account) view returns (uint256 error, uint256 liquidity, uint256 shortfall)",
 ];
-const COMPOUND_V3_COMET_ABI = [
-  "function isLiquidatable(address account) view returns (bool)",
-];
+const COMPOUND_V3_COMET_ABI = ["function isLiquidatable(address account) view returns (bool)"];
 
 class LiquidationMonitor {
-  constructor({
-    config,
-    providers,
-    logger,
-  }) {
+  constructor({ config, providers, logger }) {
     this.config = config;
     this.providers = providers;
     this.logger = logger;
@@ -33,10 +27,7 @@ class LiquidationMonitor {
   getContract(chainId, address, abi, key) {
     const cacheKey = `${chainId}:${address.toLowerCase()}:${key}`;
     if (!this.contracts.has(cacheKey)) {
-      this.contracts.set(
-        cacheKey,
-        new Contract(address, abi, this.getProvider(chainId)),
-      );
+      this.contracts.set(cacheKey, new Contract(address, abi, this.getProvider(chainId)));
     }
     return this.contracts.get(cacheKey);
   }
@@ -54,17 +45,13 @@ class LiquidationMonitor {
         String(position.flashLoanAmount || "0"),
         Number(position.flashLoanDecimals || 18),
       ),
-      expectedProfitEthWei: parseUnits(
-        String(position.expectedProfitEth || "0"),
-        18,
-      ),
+      expectedProfitEthWei: parseUnits(String(position.expectedProfitEth || "0"), 18),
       metadata,
     };
   }
 
   async scanAaveV3(position) {
-    const poolAddress =
-      position.poolAddress || this.config.addresses.AAVE_V3_POOL_MAINNET;
+    const poolAddress = position.poolAddress || this.config.addresses.AAVE_V3_POOL_MAINNET;
     const contract = this.getContract(
       position.chainId || 1,
       poolAddress,
@@ -87,17 +74,14 @@ class LiquidationMonitor {
 
   async scanCompoundV2(position) {
     const comptrollerAddress =
-      position.comptrollerAddress ||
-      this.config.addresses.COMPOUND_V2_COMPTROLLER_MAINNET;
+      position.comptrollerAddress || this.config.addresses.COMPOUND_V2_COMPTROLLER_MAINNET;
     const contract = this.getContract(
       position.chainId || 1,
       comptrollerAddress,
       COMPOUND_V2_COMPTROLLER_ABI,
       "compound-v2-comptroller",
     );
-    const [, liquidity, shortfall] = await contract.getAccountLiquidity(
-      position.borrower,
-    );
+    const [, liquidity, shortfall] = await contract.getAccountLiquidity(position.borrower);
 
     if (shortfall > 0n) {
       return this.createOpportunity(position, {
