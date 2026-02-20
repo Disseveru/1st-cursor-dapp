@@ -124,5 +124,35 @@ describe("SearcherBot", () => {
       await bot.stop();
       expect(bot.running).toBe(false);
     });
+
+    it("waits for in-flight cycle to complete on stop", async () => {
+      const bot = makeBot();
+      bot.running = true;
+      bot.inFlight = true;
+      bot.shutdownTimeoutMs = 2000;
+
+      setTimeout(() => {
+        bot.inFlight = false;
+      }, 100);
+
+      const start = Date.now();
+      await bot.stop();
+      const elapsed = Date.now() - start;
+      expect(elapsed).toBeGreaterThanOrEqual(50);
+      expect(bot.running).toBe(false);
+    });
+
+    it("exits after shutdown deadline even if cycle is stuck", async () => {
+      const bot = makeBot();
+      bot.running = true;
+      bot.inFlight = true;
+      bot.shutdownTimeoutMs = 500;
+
+      const start = Date.now();
+      await bot.stop();
+      const elapsed = Date.now() - start;
+      expect(elapsed).toBeGreaterThanOrEqual(400);
+      expect(elapsed).toBeLessThan(2000);
+    });
   });
 });

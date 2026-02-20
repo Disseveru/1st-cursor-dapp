@@ -19,6 +19,7 @@ class SearcherBot {
     this.inFlight = false;
     this.interval = null;
     this.blockListener = null;
+    this.shutdownTimeoutMs = config.app.shutdownTimeoutMs || 30000;
   }
 
   rankOpportunities(opportunities) {
@@ -39,6 +40,7 @@ class SearcherBot {
 
       const safeToRun = await this.executionEngine.checkKillSwitch();
       if (!safeToRun) {
+        this.inFlight = false;
         await this.stop();
         return;
       }
@@ -133,6 +135,17 @@ class SearcherBot {
     if (this.blockListener) {
       this.mainProvider.off("block", this.blockListener);
       this.blockListener = null;
+    }
+
+    if (this.inFlight) {
+      this.logger.info("Waiting for in-flight cycle to complete before shutdown...");
+      const deadline = Date.now() + (this.shutdownTimeoutMs || 30000);
+      while (this.inFlight && Date.now() < deadline) {
+        await new Promise((r) => setTimeout(r, 200));
+      }
+      if (this.inFlight) {
+        this.logger.warn("Shutdown deadline reached with cycle still in-flight");
+      }
     }
 
     this.logger.warn("Searcher bot stopped");
