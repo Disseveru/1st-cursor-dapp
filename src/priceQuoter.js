@@ -1,5 +1,6 @@
 const { Contract } = require("ethers");
 const { getProviderOrThrow } = require("./providers");
+const { withRetry, isTransientRpcError } = require("./utils");
 
 const UNIV3_QUOTER_ABI = [
   "function quoteExactInputSingle(address tokenIn,address tokenOut,uint24 fee,uint256 amountIn,uint160 sqrtPriceLimitX96) returns (uint256 amountOut)",
@@ -31,6 +32,16 @@ class PriceQuoter {
     return this.contracts.get(key);
   }
 
+  rpcRetryOpts(label) {
+    return {
+      maxAttempts: 3,
+      baseDelayMs: 300,
+      shouldRetry: isTransientRpcError,
+      label,
+      logger: this.logger,
+    };
+  }
+
   async quoteUniswapV3({
     chainId,
     quoter,
@@ -45,14 +56,10 @@ class PriceQuoter {
       UNIV3_QUOTER_ABI,
       "univ3quoter",
     );
-    const amountOut = await contract.quoteExactInputSingle.staticCall(
-      tokenIn,
-      tokenOut,
-      fee,
-      amountInWei,
-      0,
+    return withRetry(
+      () => contract.quoteExactInputSingle.staticCall(tokenIn, tokenOut, fee, amountInWei, 0),
+      this.rpcRetryOpts(`uniV3-quote-${chainId}`),
     );
-    return amountOut;
   }
 
   async quoteSushiV2({
@@ -68,8 +75,13 @@ class PriceQuoter {
       SUSHI_ROUTER_ABI,
       "sushirouter",
     );
-    const amounts = await contract.getAmountsOut(amountInWei, [tokenIn, tokenOut]);
-    return amounts[amounts.length - 1];
+    return withRetry(
+      async () => {
+        const amounts = await contract.getAmountsOut(amountInWei, [tokenIn, tokenOut]);
+        return amounts[amounts.length - 1];
+      },
+      this.rpcRetryOpts(`sushi-quote-${chainId}`),
+    );
   }
 
   async quoteCurve({
@@ -80,12 +92,10 @@ class PriceQuoter {
     amountInWei,
   }) {
     const contract = this.getContract(chainId, pool, CURVE_POOL_ABI, "curvepool");
-    const amountOut = await contract.get_dy(
-      BigInt(tokenInIndex),
-      BigInt(tokenOutIndex),
-      amountInWei,
+    return withRetry(
+      () => contract.get_dy(BigInt(tokenInIndex), BigInt(tokenOutIndex), amountInWei),
+      this.rpcRetryOpts(`curve-quote-${chainId}`),
     );
-    return amountOut;
   }
 
   async quoteBySource(sourceName, context) {

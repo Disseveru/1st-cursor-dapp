@@ -1,4 +1,5 @@
 const { formatEther, parseEther } = require("ethers");
+const { withRetry, isTransientRpcError } = require("./utils");
 
 class ExecutionEngine {
   constructor({
@@ -20,9 +21,22 @@ class ExecutionEngine {
     this.halted = false;
   }
 
+  rpcRetryOpts(label) {
+    return {
+      maxAttempts: 3,
+      baseDelayMs: 300,
+      shouldRetry: isTransientRpcError,
+      label,
+      logger: this.logger,
+    };
+  }
+
   async checkKillSwitch() {
     const thresholdWei = parseEther(String(this.config.risk.gasKillSwitchEth));
-    const balanceWei = await this.provider.getBalance(this.signerAddress);
+    const balanceWei = await withRetry(
+      () => this.provider.getBalance(this.signerAddress),
+      this.rpcRetryOpts("kill-switch-balance"),
+    );
 
     if (balanceWei < thresholdWei) {
       this.halted = true;
@@ -41,7 +55,10 @@ class ExecutionEngine {
   }
 
   async getGasPriceWei() {
-    const fee = await this.provider.getFeeData();
+    const fee = await withRetry(
+      () => this.provider.getFeeData(),
+      this.rpcRetryOpts("gas-price"),
+    );
     return fee.gasPrice || parseEther("0.00000002"); // 20 gwei fallback
   }
 
