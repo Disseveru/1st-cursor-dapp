@@ -9,17 +9,30 @@ function readArg(flag) {
 
 function usage() {
   console.log(
-    "Usage: npm run encrypt:key -- --private-key <0x...> --passphrase <secret>",
+    [
+      "Usage:",
+      "  HOT_WALLET_PRIVATE_KEY=<0x...> ENV_ENCRYPTION_PASSPHRASE=<secret> npm run encrypt:key",
+      "or",
+      "  npm run encrypt:key -- --private-key <0x...> --passphrase <secret>",
+    ].join("\n"),
   );
 }
 
 function main() {
-  const privateKey = readArg("--private-key");
-  const passphrase = readArg("--passphrase");
+  const privateKey =
+    process.env.HOT_WALLET_PRIVATE_KEY || readArg("--private-key");
+  const passphrase =
+    process.env.ENV_ENCRYPTION_PASSPHRASE || readArg("--passphrase");
 
   if (!privateKey || !passphrase) {
     usage();
     process.exit(1);
+  }
+
+  if (readArg("--private-key") || readArg("--passphrase")) {
+    console.error(
+      "Warning: CLI arguments can leak in shell history / process lists. Prefer env vars.",
+    );
   }
 
   const cleanKey = privateKey.trim();

@@ -94,39 +94,49 @@ class ArbitrageMonitor {
       return null;
     }
 
-    const forwardQuotes = {};
-    for (const source of sources) {
-      const out = await this.quoteSafe(source, context);
-      if (out !== null && out > 0n) {
-        forwardQuotes[source] = out;
-      }
-    }
+    const forwardQuoteResults = await Promise.all(
+      sources.map(async (source) => {
+        const out = await this.quoteSafe(source, context);
+        return [source, out];
+      }),
+    );
+    const forwardQuotes = Object.fromEntries(
+      forwardQuoteResults.filter(([, out]) => out !== null && out > 0n),
+    );
 
     const forwardEntries = Object.entries(forwardQuotes);
     if (forwardEntries.length < 2) {
       return null;
     }
 
+    const reverseRoutes = await Promise.all(
+      forwardEntries.flatMap(([buySource, buyOutWei]) =>
+        sources
+          .filter((sellSource) => sellSource !== buySource)
+          .map(async (sellSource) => {
+            const reverseContext = this.withReverseContext({
+              ...context,
+              amountInWei: buyOutWei,
+            });
+            const finalOut = await this.quoteSafe(sellSource, reverseContext);
+            if (!finalOut || finalOut <= 0n) {
+              return null;
+            }
+            return {
+              buySource,
+              sellSource,
+              buyOutWei,
+              finalOutWei: finalOut,
+              profitWei: finalOut - amountInWei,
+            };
+          }),
+      ),
+    );
+    const validRoutes = reverseRoutes.filter(Boolean);
     let bestRoute = null;
-    for (const [buySource, buyOutWei] of forwardEntries) {
-      for (const sellSource of sources) {
-        if (sellSource === buySource) continue;
-        const reverseContext = this.withReverseContext({
-          ...context,
-          amountInWei: buyOutWei,
-        });
-        const finalOut = await this.quoteSafe(sellSource, reverseContext);
-        if (!finalOut || finalOut <= 0n) continue;
-        const profitWei = finalOut - amountInWei;
-        if (!bestRoute || profitWei > bestRoute.profitWei) {
-          bestRoute = {
-            buySource,
-            sellSource,
-            buyOutWei,
-            finalOutWei: finalOut,
-            profitWei,
-          };
-        }
+    for (const route of validRoutes) {
+      if (!bestRoute || route.profitWei > bestRoute.profitWei) {
+        bestRoute = route;
       }
     }
 

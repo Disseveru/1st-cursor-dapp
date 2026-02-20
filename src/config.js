@@ -1,6 +1,6 @@
 const dotenv = require("dotenv");
 const { z } = require("zod");
-const { asBool, parseJSON } = require("./utils");
+const { asBool, parseJSON, normalizePrivateKey } = require("./utils");
 const { resolvePrivateKey } = require("./security/secrets");
 
 const DEFAULT_ADDRESSES = {
@@ -19,12 +19,14 @@ const DEFAULT_ARBITRAGE_TEMPLATE = [
   {
     connector: "oneInch",
     method: "sell",
-    args: ["{{tokenOut}}", "{{tokenIn}}", "{{flashLoanAmountWei}}", "0", "0", "9001"],
+    // Borrowed tokenIn -> tokenOut on first leg.
+    args: ["{{tokenIn}}", "{{tokenOut}}", "{{flashLoanAmountWei}}", "0", "0", "9001"],
   },
   {
     connector: "oneInch",
     method: "sell",
-    args: ["{{tokenIn}}", "{{tokenOut}}", "0", "0", "9001", "9002"],
+    // Swap back tokenOut -> tokenIn to repay flash loan.
+    args: ["{{tokenOut}}", "{{tokenIn}}", "0", "0", "9001", "9002"],
   },
   {
     connector: "instapool_v2",
@@ -49,7 +51,8 @@ const DEFAULT_LIQUIDATION_TEMPLATE = [
   {
     connector: "oneInch",
     method: "sell",
-    args: ["{{repayToken}}", "{{collateralToken}}", "0", "0", "9001", "9002"],
+    // Sell seized collateral back into repayToken before flash payback.
+    args: ["{{collateralToken}}", "{{repayToken}}", "0", "0", "9001", "9002"],
   },
   {
     connector: "instapool_v2",
@@ -57,6 +60,17 @@ const DEFAULT_LIQUIDATION_TEMPLATE = [
     args: ["{{repayToken}}", "0", "9002", "0"],
   },
 ];
+
+const DEFAULT_EXECUTION_TEMPLATES = {
+  arbitrageInnerSteps: DEFAULT_ARBITRAGE_TEMPLATE,
+  liquidationInnerSteps: DEFAULT_LIQUIDATION_TEMPLATE,
+  // Explicit protocol mapping is safer for liquidation, where connector flows differ
+  // across protocols.
+  liquidationInnerStepsByProtocol: {
+    "compound-v2": DEFAULT_LIQUIDATION_TEMPLATE,
+  },
+  crossChainInnerSteps: [],
+};
 
 function normalizeRpcMap(env) {
   const fromJson = parseJSON(env.CHAIN_RPC_JSON, {}, "CHAIN_RPC_JSON");
@@ -156,15 +170,19 @@ async function loadConfig({ logger, cliFlags }) {
     "CROSS_CHAIN_PAIRS_JSON",
   );
 
-  const executionTemplates = parseJSON(
+  const executionTemplatesInput = parseJSON(
     env.EXECUTION_TEMPLATES_JSON,
-    {
-      arbitrageInnerSteps: DEFAULT_ARBITRAGE_TEMPLATE,
-      liquidationInnerSteps: DEFAULT_LIQUIDATION_TEMPLATE,
-      crossChainInnerSteps: [],
-    },
+    DEFAULT_EXECUTION_TEMPLATES,
     "EXECUTION_TEMPLATES_JSON",
   );
+  const executionTemplates = {
+    ...DEFAULT_EXECUTION_TEMPLATES,
+    ...executionTemplatesInput,
+    liquidationInnerStepsByProtocol: {
+      ...DEFAULT_EXECUTION_TEMPLATES.liquidationInnerStepsByProtocol,
+      ...(executionTemplatesInput.liquidationInnerStepsByProtocol || {}),
+    },
+  };
 
   const chainRpcUrls = normalizeRpcMap(env);
 
@@ -200,7 +218,9 @@ async function loadConfig({ logger, cliFlags }) {
     flashbots: {
       enabled: asBool(env.USE_FLASHBOTS, true),
       relayUrl: parsed.FLASHBOTS_RELAY_URL,
-      authPrivateKey: env.FLASHBOTS_AUTH_PRIVATE_KEY,
+      authPrivateKey: env.FLASHBOTS_AUTH_PRIVATE_KEY
+        ? normalizePrivateKey(env.FLASHBOTS_AUTH_PRIVATE_KEY)
+        : "",
       maxBlocksInFuture: parsed.FLASHBOTS_MAX_BLOCKS,
       allowPublicFallback: asBool(env.ALLOW_PUBLIC_MEMPOOL_FALLBACK, false),
     },

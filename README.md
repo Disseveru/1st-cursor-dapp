@@ -35,7 +35,9 @@ Implemented capabilities:
 Generate encrypted env payload:
 
 ```bash
-npm run encrypt:key -- --private-key 0xyour_hot_wallet_key --passphrase "strong-passphrase"
+HOT_WALLET_PRIVATE_KEY=0xyour_hot_wallet_key \
+ENV_ENCRYPTION_PASSPHRASE="strong-passphrase" \
+npm run encrypt:key
 ```
 
 ---
@@ -123,6 +125,7 @@ npm run start
 
 - `arbitrageInnerSteps`
 - `liquidationInnerSteps`
+- `liquidationInnerStepsByProtocol` (recommended for `aave-v3`, `compound-v2`, `compound-v3`)
 - `crossChainInnerSteps`
 
 Each step follows:
