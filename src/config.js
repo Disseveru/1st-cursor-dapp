@@ -2,6 +2,12 @@ const dotenv = require("dotenv");
 const { z } = require("zod");
 const { asBool, parseJSON } = require("./utils");
 const { resolvePrivateKey } = require("./security/secrets");
+const {
+  validateArbitragePairs,
+  validateLiquidationPositions,
+  validateCrossChainPairs,
+  validateExecutionTemplates,
+} = require("./configSchemas");
 
 const DEFAULT_ADDRESSES = {
   WETH_MAINNET: "0xC02aaA39b223FE8D0A0E5C4F27eAD9083C756Cc2",
@@ -110,7 +116,7 @@ async function loadConfig({ logger, cliFlags }) {
     GAS_MULTIPLIER: env.GAS_MULTIPLIER || 1.15,
   });
 
-  const arbitragePairs = parseJSON(
+  const rawArbitragePairs = parseJSON(
     env.ARBITRAGE_PAIRS_JSON,
     [
       {
@@ -143,20 +149,23 @@ async function loadConfig({ logger, cliFlags }) {
     ],
     "ARBITRAGE_PAIRS_JSON",
   );
+  const arbitragePairs = validateArbitragePairs(rawArbitragePairs, logger);
 
-  const liquidationPositions = parseJSON(
+  const rawLiquidationPositions = parseJSON(
     env.LIQUIDATION_POSITIONS_JSON,
     [],
     "LIQUIDATION_POSITIONS_JSON",
   );
+  const liquidationPositions = validateLiquidationPositions(rawLiquidationPositions, logger);
 
-  const crossChainPairs = parseJSON(
+  const rawCrossChainPairs = parseJSON(
     env.CROSS_CHAIN_PAIRS_JSON,
     [],
     "CROSS_CHAIN_PAIRS_JSON",
   );
+  const crossChainPairs = validateCrossChainPairs(rawCrossChainPairs, logger);
 
-  const executionTemplates = parseJSON(
+  const rawExecutionTemplates = parseJSON(
     env.EXECUTION_TEMPLATES_JSON,
     {
       arbitrageInnerSteps: DEFAULT_ARBITRAGE_TEMPLATE,
@@ -165,6 +174,7 @@ async function loadConfig({ logger, cliFlags }) {
     },
     "EXECUTION_TEMPLATES_JSON",
   );
+  const executionTemplates = validateExecutionTemplates(rawExecutionTemplates, logger);
 
   const chainRpcUrls = normalizeRpcMap(env);
 
