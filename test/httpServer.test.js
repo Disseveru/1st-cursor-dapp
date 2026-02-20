@@ -30,6 +30,12 @@ describe("httpServer", () => {
     });
 
     try {
+      await new Promise((resolve, reject) => {
+        if (serverHandle.server.listening) return resolve();
+        serverHandle.server.once("listening", resolve);
+        serverHandle.server.once("error", reject);
+      });
+
       const address = serverHandle.server.address();
       const baseUrl = `http://127.0.0.1:${address.port}`;
 
