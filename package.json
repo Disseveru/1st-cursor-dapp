@@ -1,0 +1,45 @@
+{
+  "name": "instadapp-autonomous-searcher-bot",
+  "version": "1.0.0",
+  "description": "Node.js autonomous searcher bot for Instadapp DSA flash-loan arbitrage and liquidations",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "start:once": "node src/index.js --once",
+    "dry-run": "node src/index.js --dry-run --once",
+    "check": "node -e \"require('./src/index.js')\"",
+    "encrypt:key": "node scripts/encrypt-env.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Disseveru/1st-cursor-dapp.git"
+  },
+  "keywords": [
+    "instadapp",
+    "dsa",
+    "searcher",
+    "flashloan",
+    "arbitrage",
+    "liquidation",
+    "flashbots",
+    "defi"
+  ],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Disseveru/1st-cursor-dapp/issues"
+  },
+  "homepage": "https://github.com/Disseveru/1st-cursor-dapp#readme",
+  "dependencies": {
+    "@aws-sdk/client-secrets-manager": "^3.994.0",
+    "@flashbots/ethers-provider-bundle": "^1.0.0",
+    "@instadapp/avocado": "^0.4.5",
+    "axios": "^1.13.5",
+    "dotenv": "^17.3.1",
+    "dsa-sdk": "^1.5.15",
+    "ethers": "^6.7.1",
+    "pino": "^10.3.1",
+    "web3": "^1.10.4",
+    "zod": "^4.3.6"
+  }
+}
