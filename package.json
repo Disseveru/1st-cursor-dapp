@@ -5,6 +5,7 @@
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
+    "start:web": "WEB_DASHBOARD_ENABLED=true node src/index.js",
     "start:once": "node src/index.js --once",
     "dry-run": "node src/index.js --dry-run --once",
     "check": "node -e \"require('./src/index.js')\"",
@@ -47,6 +48,7 @@
     "dotenv": "^17.3.1",
     "dsa-sdk": "^1.5.15",
     "ethers": "^6.7.1",
+    "express": "^5.2.1",
     "pino": "^10.3.1",
     "web3": "^1.10.4",
     "zod": "^4.3.6"

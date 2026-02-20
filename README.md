@@ -3,6 +3,18 @@
 Autonomous searcher bot that integrates with **Instadapp DSA (dsa-sdk)** to execute
 flash-loan-backed arbitrage and liquidation spells.
 
+## Vision for Everyday Users
+
+The long-term product is not "run a bot from a terminal".  
+It is a simple consumer dApp where users can:
+
+1. Connect wallet
+2. Choose a risk profile
+3. Deposit into a non-custodial strategy vault
+4. Track performance and withdraw anytime
+
+This repository is the execution/searcher engine that powers that experience.
+
 Implemented capabilities:
 
 - **Connection & key management**
@@ -84,6 +96,14 @@ npm run dry-run
 npm run start
 ```
 
+7. Optional: enable a user-friendly dashboard/API:
+
+```bash
+WEB_DASHBOARD_ENABLED=true WEB_PORT=3000 npm run start
+```
+
+Then open: `http://localhost:3000`
+
 ---
 
 ## Runtime Modes
@@ -94,6 +114,19 @@ npm run start
   execute one monitor/execution cycle.
 - `npm run dry-run`  
   single cycle with execution disabled.
+
+---
+
+## Consumer Access Layer (New)
+
+If enabled (`WEB_DASHBOARD_ENABLED=true`), the bot also exposes:
+
+- `GET /health` - service health
+- `GET /api/status` - runtime status metrics
+- `GET /api/risk-profiles` - beginner-friendly strategy profile presets
+- `GET /api/vision` - product flow and roadmap context
+
+And serves a lightweight dashboard at `/`.
 
 ---
 
@@ -158,6 +191,10 @@ Placeholders like `{{tokenIn}}`, `{{flashLoanAmountWei}}`, `{{borrower}}` are su
   profitability gate, kill-switch, private/public execution.
 - `src/flashbotsExecutor.js`  
   Flashbots private transaction relay.
+- `src/httpServer.js`  
+  Optional user-facing dashboard/API server.
+- `src/riskProfiles.js`  
+  Risk profile presets for non-technical users.
 
 ---
 
@@ -166,3 +203,21 @@ Placeholders like `{{tokenIn}}`, `{{flashLoanAmountWei}}`, `{{borrower}}` are su
 - This repository provides automation infrastructure, not guaranteed profitability.
 - Always start in dry-run mode and test with small notional values.
 - Production searchers usually need additional simulation, fallback routing, and re-org handling.
+
+---
+
+## Product Roadmap (Consumer dApp)
+
+### Phase 1 (current)
+- Searcher engine with safeguards (Flashbots, kill-switch, retries, status reporting)
+- Configurable monitoring/execution stack
+- Basic dashboard/API for visibility
+
+### Phase 2
+- Non-custodial vault contracts for pooled strategy execution
+- Wallet-first UI with risk profile onboarding
+- Deposit/withdraw UX and strategy selection
+
+### Phase 3
+- Production analytics, user notifications, and policy controls
+- Multi-strategy routing and governance-managed parameters

@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Instadapp Searcher Dashboard</title>
+    <style>
+      body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: #0f172a;
+        color: #e2e8f0;
+      }
+      main {
+        max-width: 920px;
+        margin: 32px auto;
+        padding: 0 16px;
+      }
+      .card {
+        background: #111827;
+        border: 1px solid #1f2937;
+        border-radius: 10px;
+        padding: 16px;
+        margin-bottom: 16px;
+      }
+      h1,
+      h2 {
+        margin-top: 0;
+      }
+      code {
+        background: #1f2937;
+        padding: 2px 6px;
+        border-radius: 6px;
+      }
+      pre {
+        white-space: pre-wrap;
+        word-break: break-word;
+        background: #030712;
+        border-radius: 8px;
+        padding: 12px;
+      }
+      .ok {
+        color: #22c55e;
+      }
+      .warn {
+        color: #f59e0b;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Instadapp Searcher Bot Dashboard</h1>
+      <div class="card">
+        <h2>Project Vision</h2>
+        <p>
+          Build a user-friendly DeFi product where everyday users can connect a wallet, choose risk
+          settings, and use non-custodial strategy vaults powered by automated searchers.
+        </p>
+        <p class="warn">
+          Current status: engine + monitoring + execution backend are live. Consumer vault UI flow is
+          in progress.
+        </p>
+      </div>
+
+      <div class="card">
+        <h2>Health</h2>
+        <p id="health">Loading...</p>
+      </div>
+
+      <div class="card">
+        <h2>Bot Status</h2>
+        <pre id="status">Loading...</pre>
+      </div>
+
+      <div class="card">
+        <h2>Risk Profiles</h2>
+        <pre id="profiles">Loading...</pre>
+      </div>
+
+      <div class="card">
+        <h2>Quick Start for Users (Managed Mode)</h2>
+        <ol>
+          <li>Connect wallet in the consumer dApp (next phase).</li>
+          <li>Pick a profile: <code>conservative</code>, <code>balanced</code>, or <code>aggressive</code>.</li>
+          <li>Deposit in non-custodial vault contract.</li>
+          <li>Track PnL and withdraw at any time.</li>
+        </ol>
+      </div>
+    </main>
+
+    <script>
+      async function loadJson(url) {
+        const response = await fetch(url);
+        if (!response.ok) {
+          throw new Error(`${url} failed: ${response.status}`);
+        }
+        return response.json();
+      }
+
+      async function refresh() {
+        try {
+          const health = await loadJson("/health");
+          document.getElementById("health").innerHTML = `<span class="ok">ok=${health.ok}</span>`;
+
+          const status = await loadJson("/api/status");
+          document.getElementById("status").textContent = JSON.stringify(status, null, 2);
+
+          const profiles = await loadJson("/api/risk-profiles");
+          document.getElementById("profiles").textContent = JSON.stringify(profiles, null, 2);
+        } catch (error) {
+          document.getElementById("health").textContent = `Error: ${error.message}`;
+        }
+      }
+
+      refresh();
+      setInterval(refresh, 5000);
+    </script>
+  </body>
+</html>

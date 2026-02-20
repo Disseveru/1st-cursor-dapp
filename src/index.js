@@ -12,6 +12,7 @@ const { ExecutionEngine } = require("./executionEngine");
 const { AvocadoBalanceFetcher } = require("./avocadoBalanceFetcher");
 const { StatusReporter } = require("./statusReporter");
 const { SearcherBot } = require("./bot");
+const { createHttpServer } = require("./httpServer");
 
 function parseFlags(argv) {
   return {
@@ -98,6 +99,15 @@ async function bootstrap() {
   });
 
   const statusReporter = new StatusReporter({ logger });
+  let httpServer = null;
+
+  if (config.app.webDashboardEnabled) {
+    httpServer = createHttpServer({
+      config,
+      statusReporter,
+      logger,
+    });
+  }
 
   const bot = new SearcherBot({
     config,
@@ -121,6 +131,13 @@ async function bootstrap() {
     }, 35000);
     forceTimeout.unref();
     await bot.stop();
+    if (httpServer) {
+      try {
+        await httpServer.close();
+      } catch (error) {
+        logger.warn({ error: error.message }, "HTTP server close failed");
+      }
+    }
     process.exit(0);
   }
   process.on("SIGINT", () => gracefulShutdown("SIGINT"));
