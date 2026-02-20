@@ -51,11 +51,7 @@ class SearcherBot {
         this.crossChainMonitor.scan(),
       ]);
 
-      const opportunities = this.rankOpportunities([
-        ...arbOpps,
-        ...liqOpps,
-        ...crossOpps,
-      ]);
+      const opportunities = this.rankOpportunities([...arbOpps, ...liqOpps, ...crossOpps]);
 
       if (!opportunities.length) {
         this.logger.debug("No executable opportunities in this cycle");
@@ -85,10 +81,7 @@ class SearcherBot {
         }
       }
     } catch (error) {
-      this.logger.error(
-        { error: error.message, stack: error.stack },
-        "Cycle failed",
-      );
+      this.logger.error({ error: error.message, stack: error.stack }, "Cycle failed");
     } finally {
       this.inFlight = false;
     }

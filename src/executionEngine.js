@@ -2,15 +2,7 @@ const { formatEther, parseEther } = require("ethers");
 const { withRetry, isTransientRpcError } = require("./utils");
 
 class ExecutionEngine {
-  constructor({
-    config,
-    dsa,
-    signerAddress,
-    provider,
-    spellBuilder,
-    flashbotsExecutor,
-    logger,
-  }) {
+  constructor({ config, dsa, signerAddress, provider, spellBuilder, flashbotsExecutor, logger }) {
     this.config = config;
     this.dsa = dsa;
     this.signerAddress = signerAddress;
@@ -55,10 +47,7 @@ class ExecutionEngine {
   }
 
   async getGasPriceWei() {
-    const fee = await withRetry(
-      () => this.provider.getFeeData(),
-      this.rpcRetryOpts("gas-price"),
-    );
+    const fee = await withRetry(() => this.provider.getFeeData(), this.rpcRetryOpts("gas-price"));
     return fee.gasPrice || parseEther("0.00000002"); // 20 gwei fallback
   }
 

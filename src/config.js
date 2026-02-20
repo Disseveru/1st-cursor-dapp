@@ -17,8 +17,7 @@ const DEFAULT_ADDRESSES = {
   SUSHI_ROUTER_MAINNET: "0xd9e1cE17f2641f24aE83637ab66a2cca9C378B9F",
   CURVE_3POOL_MAINNET: "0xbEbC44782C7dB0a1A60Cb6Fe97d0b483032FF1C7",
   AAVE_V3_POOL_MAINNET: "0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2",
-  COMPOUND_V2_COMPTROLLER_MAINNET:
-    "0x3d9819210A31b4961b30EF54bE2aeD79B9c9Cd3B",
+  COMPOUND_V2_COMPTROLLER_MAINNET: "0x3d9819210A31b4961b30EF54bE2aeD79B9c9Cd3B",
 };
 
 const DEFAULT_ARBITRAGE_TEMPLATE = [
@@ -73,9 +72,7 @@ function normalizeRpcMap(env) {
   if (env.ARBITRUM_RPC_URL) map[42161] = env.ARBITRUM_RPC_URL;
   if (env.AVOCADO_RPC_URL) map[634] = env.AVOCADO_RPC_URL;
 
-  return Object.fromEntries(
-    Object.entries(map).filter(([, value]) => Boolean(value)),
-  );
+  return Object.fromEntries(Object.entries(map).filter(([, value]) => Boolean(value)));
 }
 
 async function loadConfig({ logger, cliFlags }) {
@@ -84,10 +81,7 @@ async function loadConfig({ logger, cliFlags }) {
 
   const privateKey = await resolvePrivateKey(env, logger);
 
-  const primaryRpc =
-    env.QUICKNODE_RPC_URL ||
-    env.ALCHEMY_RPC_URL ||
-    env.ETHEREUM_RPC_URL;
+  const primaryRpc = env.QUICKNODE_RPC_URL || env.ALCHEMY_RPC_URL || env.ETHEREUM_RPC_URL;
 
   const schema = z.object({
     DSA_ID: z.coerce.number().int().positive(),
@@ -110,8 +104,7 @@ async function loadConfig({ logger, cliFlags }) {
     GAS_KILL_SWITCH_ETH: env.GAS_KILL_SWITCH_ETH || 0.05,
     MIN_PROFIT_ETH: env.MIN_PROFIT_ETH || 0.002,
     FLASHLOAN_ROUTE: env.FLASHLOAN_ROUTE || 0,
-    FLASHBOTS_RELAY_URL:
-      env.FLASHBOTS_RELAY_URL || "https://relay.flashbots.net",
+    FLASHBOTS_RELAY_URL: env.FLASHBOTS_RELAY_URL || "https://relay.flashbots.net",
     FLASHBOTS_MAX_BLOCKS: env.FLASHBOTS_MAX_BLOCKS || 6,
     GAS_MULTIPLIER: env.GAS_MULTIPLIER || 1.15,
   });
@@ -158,11 +151,7 @@ async function loadConfig({ logger, cliFlags }) {
   );
   const liquidationPositions = validateLiquidationPositions(rawLiquidationPositions, logger);
 
-  const rawCrossChainPairs = parseJSON(
-    env.CROSS_CHAIN_PAIRS_JSON,
-    [],
-    "CROSS_CHAIN_PAIRS_JSON",
-  );
+  const rawCrossChainPairs = parseJSON(env.CROSS_CHAIN_PAIRS_JSON, [], "CROSS_CHAIN_PAIRS_JSON");
   const crossChainPairs = validateCrossChainPairs(rawCrossChainPairs, logger);
 
   const rawExecutionTemplates = parseJSON(
@@ -194,8 +183,7 @@ async function loadConfig({ logger, cliFlags }) {
       dsaId: parsed.DSA_ID,
       privateKey,
       rpcUrl: parsed.ETHEREUM_RPC_URL,
-      origin:
-        env.DSA_ORIGIN || "0x0000000000000000000000000000000000000000",
+      origin: env.DSA_ORIGIN || "0x0000000000000000000000000000000000000000",
     },
     providers: {
       chainRpcUrls,

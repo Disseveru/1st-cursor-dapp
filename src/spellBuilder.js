@@ -37,9 +37,7 @@ class SpellBuilder {
     return templateSteps.map((step) => ({
       connector: this.valueFromContext(step.connector, context),
       method: this.valueFromContext(step.method, context),
-      args: this.valueFromContext(step.args || [], context).map((arg) =>
-        this.normalizeArg(arg),
-      ),
+      args: this.valueFromContext(step.args || [], context).map((arg) => this.normalizeArg(arg)),
     }));
   }
 
@@ -57,8 +55,7 @@ class SpellBuilder {
 
   ensureFlashPayback(innerSpells, tokenAddress) {
     const hasPayback = innerSpells.data.some(
-      (step) =>
-        step.connector === "instapool_v2" && step.method === "flashPayback",
+      (step) => step.connector === "instapool_v2" && step.method === "flashPayback",
     );
 
     if (!hasPayback) {
@@ -104,9 +101,7 @@ class SpellBuilder {
     const context = this.buildContext(opportunity);
     const templateSteps = this.templateForOpportunity(opportunity.type);
     if (!templateSteps.length) {
-      throw new Error(
-        `No execution template configured for opportunity type: ${opportunity.type}`,
-      );
+      throw new Error(`No execution template configured for opportunity type: ${opportunity.type}`);
     }
 
     const innerSpells = this.buildSpellFromTemplate(templateSteps, context);

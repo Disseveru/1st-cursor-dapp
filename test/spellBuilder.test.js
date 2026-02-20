@@ -42,7 +42,14 @@ function makeConfig(overrides = {}) {
           {
             connector: "compound",
             method: "liquidate",
-            args: ["{{borrower}}", "{{repayToken}}", "{{collateralToken}}", "{{flashLoanAmountWei}}", "0", "9001"],
+            args: [
+              "{{borrower}}",
+              "{{repayToken}}",
+              "{{collateralToken}}",
+              "{{flashLoanAmountWei}}",
+              "0",
+              "9001",
+            ],
           },
         ],
         crossChainInnerSteps: [],
@@ -80,9 +87,7 @@ describe("SpellBuilder", () => {
     });
 
     it("handles embedded placeholders in longer string", () => {
-      expect(
-        builder.valueFromContext("prefix-{{x}}-suffix", { x: "42" }),
-      ).toBe("prefix-42-suffix");
+      expect(builder.valueFromContext("prefix-{{x}}-suffix", { x: "42" })).toBe("prefix-42-suffix");
     });
 
     it("recursively resolves arrays", () => {
@@ -189,9 +194,9 @@ describe("SpellBuilder", () => {
         logger: nullLogger,
       });
 
-      expect(() =>
-        builder.buildFlashloanSpell({ type: "unknown" }),
-      ).toThrow("No execution template configured for opportunity type: unknown");
+      expect(() => builder.buildFlashloanSpell({ type: "unknown" })).toThrow(
+        "No execution template configured for opportunity type: unknown",
+      );
     });
   });
 });

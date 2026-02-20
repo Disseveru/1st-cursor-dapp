@@ -39,19 +39,18 @@ describe("arbitragePairSchema", () => {
   });
 
   it("rejects missing label", () => {
-    const { label, ...rest } = validPair;
+    const { label: _label, ...rest } = validPair;
     expect(arbitragePairSchema.safeParse(rest).success).toBe(false);
   });
 
   it("rejects invalid token address", () => {
-    expect(
-      arbitragePairSchema.safeParse({ ...validPair, tokenIn: "not-an-address" })
-        .success,
-    ).toBe(false);
+    expect(arbitragePairSchema.safeParse({ ...validPair, tokenIn: "not-an-address" }).success).toBe(
+      false,
+    );
   });
 
   it("provides defaults for decimals", () => {
-    const { tokenInDecimals, tokenOutDecimals, ...rest } = validPair;
+    const { tokenInDecimals: _tid, tokenOutDecimals: _tod, ...rest } = validPair;
     const result = arbitragePairSchema.parse(rest);
     expect(result.tokenInDecimals).toBe(18);
     expect(result.tokenOutDecimals).toBe(18);
@@ -71,10 +70,9 @@ describe("liquidationPositionSchema", () => {
   });
 
   it("rejects unsupported protocol", () => {
-    expect(
-      liquidationPositionSchema.safeParse({ ...validPos, protocol: "maker" })
-        .success,
-    ).toBe(false);
+    expect(liquidationPositionSchema.safeParse({ ...validPos, protocol: "maker" }).success).toBe(
+      false,
+    );
   });
 
   it("defaults chainId to 1", () => {
@@ -88,8 +86,8 @@ describe("crossChainPairSchema", () => {
     label: "ETH/USDC spread",
     baseChainId: 1,
     compareChainId: 42161,
-    tokenInByChain: { "1": VALID_ADDR, "42161": VALID_ADDR },
-    tokenOutByChain: { "1": VALID_ADDR2, "42161": VALID_ADDR2 },
+    tokenInByChain: { 1: VALID_ADDR, 42161: VALID_ADDR },
+    tokenOutByChain: { 1: VALID_ADDR2, 42161: VALID_ADDR2 },
   };
 
   it("accepts a valid cross-chain pair", () => {
@@ -97,7 +95,7 @@ describe("crossChainPairSchema", () => {
   });
 
   it("rejects missing baseChainId", () => {
-    const { baseChainId, ...rest } = validPair;
+    const { baseChainId: _bci, ...rest } = validPair;
     expect(crossChainPairSchema.safeParse(rest).success).toBe(false);
   });
 });
@@ -105,9 +103,7 @@ describe("crossChainPairSchema", () => {
 describe("executionTemplatesSchema", () => {
   it("accepts valid templates", () => {
     const valid = {
-      arbitrageInnerSteps: [
-        { connector: "oneInch", method: "sell", args: ["a", "b"] },
-      ],
+      arbitrageInnerSteps: [{ connector: "oneInch", method: "sell", args: ["a", "b"] }],
       liquidationInnerSteps: [],
       crossChainInnerSteps: [],
     };

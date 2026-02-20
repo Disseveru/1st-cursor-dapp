@@ -2,14 +2,17 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function withRetry(fn, {
-  maxAttempts = 3,
-  baseDelayMs = 500,
-  maxDelayMs = 8000,
-  shouldRetry = () => true,
-  label = "operation",
-  logger = null,
-} = {}) {
+async function withRetry(
+  fn,
+  {
+    maxAttempts = 3,
+    baseDelayMs = 500,
+    maxDelayMs = 8000,
+    shouldRetry = () => true,
+    label = "operation",
+    logger = null,
+  } = {},
+) {
   let lastError;
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {

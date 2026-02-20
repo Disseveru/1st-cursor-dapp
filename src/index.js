@@ -28,9 +28,7 @@ async function bootstrap() {
   const providers = createProviderMap(config.providers.chainRpcUrls);
   const mainProvider = providers[1];
   if (!mainProvider) {
-    throw new Error(
-      "Mainnet provider missing. Configure ETHEREUM_RPC_URL or CHAIN_RPC_JSON[1].",
-    );
+    throw new Error("Mainnet provider missing. Configure ETHEREUM_RPC_URL or CHAIN_RPC_JSON[1].");
   }
 
   const { dsa, signerAddress } = await createInstadappClient({

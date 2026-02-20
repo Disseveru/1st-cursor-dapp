@@ -25,19 +25,13 @@ describe("parseJSON", () => {
 });
 
 describe("asBool", () => {
-  it.each(["1", "true", "yes", "on", "TRUE", "Yes", "ON"])(
-    "returns true for %s",
-    (val) => {
-      expect(asBool(val)).toBe(true);
-    },
-  );
+  it.each(["1", "true", "yes", "on", "TRUE", "Yes", "ON"])("returns true for %s", (val) => {
+    expect(asBool(val)).toBe(true);
+  });
 
-  it.each(["0", "false", "no", "off", "anything"])(
-    "returns false for %s",
-    (val) => {
-      expect(asBool(val)).toBe(false);
-    },
-  );
+  it.each(["0", "false", "no", "off", "anything"])("returns false for %s", (val) => {
+    expect(asBool(val)).toBe(false);
+  });
 
   it("returns fallback for undefined/null/empty", () => {
     expect(asBool(undefined, true)).toBe(true);

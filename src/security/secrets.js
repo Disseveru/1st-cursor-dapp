@@ -1,14 +1,8 @@
 const crypto = require("crypto");
-const {
-  SecretsManagerClient,
-  GetSecretValueCommand,
-} = require("@aws-sdk/client-secrets-manager");
+const { SecretsManagerClient, GetSecretValueCommand } = require("@aws-sdk/client-secrets-manager");
 const { normalizePrivateKey } = require("../utils");
 
-function decryptEncryptedEnv({
-  encryptedValue,
-  passphrase,
-}) {
+function decryptEncryptedEnv({ encryptedValue, passphrase }) {
   if (!encryptedValue || !passphrase) return null;
 
   const raw = Buffer.from(encryptedValue, "base64");
@@ -21,24 +15,16 @@ function decryptEncryptedEnv({
   const decipher = crypto.createDecipheriv("aes-256-gcm", key, iv);
   decipher.setAuthTag(tag);
 
-  const decrypted = Buffer.concat([
-    decipher.update(payload),
-    decipher.final(),
-  ]).toString("utf8");
+  const decrypted = Buffer.concat([decipher.update(payload), decipher.final()]).toString("utf8");
 
   return normalizePrivateKey(decrypted.trim());
 }
 
-async function fetchPrivateKeyFromAws({
-  secretId,
-  region,
-}) {
+async function fetchPrivateKeyFromAws({ secretId, region }) {
   if (!secretId || !region) return null;
 
   const client = new SecretsManagerClient({ region });
-  const response = await client.send(
-    new GetSecretValueCommand({ SecretId: secretId }),
-  );
+  const response = await client.send(new GetSecretValueCommand({ SecretId: secretId }));
 
   if (!response.SecretString) {
     throw new Error("AWS secret must contain SecretString.");
@@ -49,15 +35,9 @@ async function fetchPrivateKeyFromAws({
   // Supports either raw private key string or a JSON payload.
   if (secret.startsWith("{")) {
     const parsed = JSON.parse(secret);
-    const key =
-      parsed.PRIVATE_KEY ||
-      parsed.privateKey ||
-      parsed.key ||
-      parsed.secret;
+    const key = parsed.PRIVATE_KEY || parsed.privateKey || parsed.key || parsed.secret;
     if (!key) {
-      throw new Error(
-        "AWS secret JSON did not contain PRIVATE_KEY/privateKey/key/secret.",
-      );
+      throw new Error("AWS secret JSON did not contain PRIVATE_KEY/privateKey/key/secret.");
     }
     return normalizePrivateKey(String(key));
   }
@@ -73,10 +53,7 @@ async function resolvePrivateKey(env, logger) {
   const plain = env.PRIVATE_KEY;
 
   if (secretId && awsRegion) {
-    logger.info(
-      { secretId, awsRegion },
-      "Loading private key from AWS Secrets Manager",
-    );
+    logger.info({ secretId, awsRegion }, "Loading private key from AWS Secrets Manager");
     return fetchPrivateKeyFromAws({ secretId, region: awsRegion });
   }
 

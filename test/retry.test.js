@@ -34,9 +34,7 @@ describe("withRetry", () => {
       throw new Error("always fails");
     });
 
-    await expect(
-      withRetry(fn, { maxAttempts: 2, baseDelayMs: 1 }),
-    ).rejects.toThrow("always fails");
+    await expect(withRetry(fn, { maxAttempts: 2, baseDelayMs: 1 })).rejects.toThrow("always fails");
     expect(fn).toHaveBeenCalledTimes(2);
   });
 
@@ -95,9 +93,7 @@ describe("isTransientRpcError", () => {
   });
 
   it("returns false for non-transient errors", () => {
-    expect(isTransientRpcError(new Error("revert: insufficient balance"))).toBe(
-      false,
-    );
+    expect(isTransientRpcError(new Error("revert: insufficient balance"))).toBe(false);
     expect(isTransientRpcError(new Error("invalid argument"))).toBe(false);
   });
 });

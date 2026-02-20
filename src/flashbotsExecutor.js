@@ -9,12 +9,7 @@ function isRelayError(response) {
 }
 
 class FlashbotsExecutor {
-  constructor({
-    provider,
-    privateKey,
-    config,
-    logger,
-  }) {
+  constructor({ provider, privateKey, config, logger }) {
     this.provider = provider;
     this.privateKey = privateKey;
     this.config = config;
@@ -40,10 +35,7 @@ class FlashbotsExecutor {
     );
 
     this.initialized = true;
-    this.logger.info(
-      { relay: this.config.relayUrl },
-      "Flashbots private relay initialized",
-    );
+    this.logger.info({ relay: this.config.relayUrl }, "Flashbots private relay initialized");
   }
 
   async sendPrivate(txRequest) {
@@ -71,14 +63,11 @@ class FlashbotsExecutor {
     );
 
     if (isRelayError(response)) {
-      throw new Error(
-        `Flashbots relay error (${response.error.code}): ${response.error.message}`,
-      );
+      throw new Error(`Flashbots relay error (${response.error.code}): ${response.error.message}`);
     }
 
     const resolution = await response.wait();
-    const included =
-      resolution === FlashbotsTransactionResolution.TransactionIncluded;
+    const included = resolution === FlashbotsTransactionResolution.TransactionIncluded;
     const txHash = response.transaction?.hash;
 
     return {

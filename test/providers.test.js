@@ -22,8 +22,6 @@ describe("getProviderOrThrow", () => {
   });
 
   it("throws for a missing chain ID", () => {
-    expect(() => getProviderOrThrow({}, 999)).toThrow(
-      "Missing provider for chainId 999",
-    );
+    expect(() => getProviderOrThrow({}, 999)).toThrow("Missing provider for chainId 999");
   });
 });

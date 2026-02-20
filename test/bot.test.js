@@ -40,10 +40,7 @@ describe("SearcherBot", () => {
 
     it("handles missing expectedProfitEthWei (defaults to 0n)", () => {
       const bot = makeBot();
-      const opps = [
-        { label: "zero" },
-        { label: "some", expectedProfitEthWei: 1n },
-      ];
+      const opps = [{ label: "zero" }, { label: "some", expectedProfitEthWei: 1n }];
       const ranked = bot.rankOpportunities(opps);
       expect(ranked[0].label).toBe("some");
     });
@@ -88,9 +85,7 @@ describe("SearcherBot", () => {
       });
       await bot.runCycle("test");
       expect(executeOpportunity).toHaveBeenCalledTimes(1);
-      expect(executeOpportunity).toHaveBeenCalledWith(
-        expect.objectContaining({ label: "opp1" }),
-      );
+      expect(executeOpportunity).toHaveBeenCalledWith(expect.objectContaining({ label: "opp1" }));
     });
 
     it("logs and continues when cycle throws", async () => {

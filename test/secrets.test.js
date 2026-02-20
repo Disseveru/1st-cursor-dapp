@@ -6,10 +6,7 @@ function encryptForTest(plaintext, passphrase) {
   const iv = crypto.randomBytes(12);
   const key = crypto.scryptSync(passphrase, salt, 32);
   const cipher = crypto.createCipheriv("aes-256-gcm", key, iv);
-  const encrypted = Buffer.concat([
-    cipher.update(plaintext, "utf8"),
-    cipher.final(),
-  ]);
+  const encrypted = Buffer.concat([cipher.update(plaintext, "utf8"), cipher.final()]);
   const tag = cipher.getAuthTag();
   return Buffer.concat([salt, iv, tag, encrypted]).toString("base64");
 }
@@ -40,21 +37,15 @@ describe("decryptEncryptedEnv", () => {
   });
 
   it("returns null when encryptedValue is missing", () => {
-    expect(
-      decryptEncryptedEnv({ encryptedValue: null, passphrase: "x" }),
-    ).toBeNull();
+    expect(decryptEncryptedEnv({ encryptedValue: null, passphrase: "x" })).toBeNull();
   });
 
   it("returns null when passphrase is missing", () => {
-    expect(
-      decryptEncryptedEnv({ encryptedValue: "abc", passphrase: "" }),
-    ).toBeNull();
+    expect(decryptEncryptedEnv({ encryptedValue: "abc", passphrase: "" })).toBeNull();
   });
 
   it("throws on wrong passphrase", () => {
     const encrypted = encryptForTest("0xkey", "correct");
-    expect(() =>
-      decryptEncryptedEnv({ encryptedValue: encrypted, passphrase: "wrong" }),
-    ).toThrow();
+    expect(() => decryptEncryptedEnv({ encryptedValue: encrypted, passphrase: "wrong" })).toThrow();
   });
 });

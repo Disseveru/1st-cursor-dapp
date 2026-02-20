@@ -8,9 +8,7 @@ function readArg(flag) {
 }
 
 function usage() {
-  console.log(
-    "Usage: npm run encrypt:key -- --private-key <0x...> --passphrase <secret>",
-  );
+  console.log("Usage: npm run encrypt:key -- --private-key <0x...> --passphrase <secret>");
 }
 
 function main() {
@@ -28,10 +26,7 @@ function main() {
   const key = crypto.scryptSync(passphrase, salt, 32);
 
   const cipher = crypto.createCipheriv("aes-256-gcm", key, iv);
-  const encrypted = Buffer.concat([
-    cipher.update(cleanKey, "utf8"),
-    cipher.final(),
-  ]);
+  const encrypted = Buffer.concat([cipher.update(cleanKey, "utf8"), cipher.final()]);
   const tag = cipher.getAuthTag();
 
   const payload = Buffer.concat([salt, iv, tag, encrypted]).toString("base64");

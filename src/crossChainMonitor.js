@@ -2,12 +2,7 @@ const { parseUnits } = require("ethers");
 const { addressEq } = require("./utils");
 
 class CrossChainMonitor {
-  constructor({
-    config,
-    quoter,
-    avocadoBalanceFetcher,
-    logger,
-  }) {
+  constructor({ config, quoter, avocadoBalanceFetcher, logger }) {
     this.config = config;
     this.quoter = quoter;
     this.avocadoBalanceFetcher = avocadoBalanceFetcher;
@@ -85,11 +80,7 @@ class CrossChainMonitor {
 
     try {
       const baseContext = this.sourceContextForChain(pair, baseChainId, amountInWei);
-      const compareContext = this.sourceContextForChain(
-        pair,
-        compareChainId,
-        amountInWei,
-      );
+      const compareContext = this.sourceContextForChain(pair, compareChainId, amountInWei);
       const sourceName = pair.source?.name || "uniswapV3";
 
       const [baseQuote, compareQuote] = await Promise.all([
@@ -112,10 +103,7 @@ class CrossChainMonitor {
       let expectedProfitEthWei = 0n;
       if (
         pair.tokenOutByChain?.[String(baseChainId)] &&
-        addressEq(
-          pair.tokenOutByChain[String(baseChainId)],
-          this.config.tokens.weth,
-        )
+        addressEq(pair.tokenOutByChain[String(baseChainId)], this.config.tokens.weth)
       ) {
         expectedProfitEthWei = spreadWei;
       } else if (pair.expectedProfitEth) {

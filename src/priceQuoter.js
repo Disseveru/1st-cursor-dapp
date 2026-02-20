@@ -8,9 +8,7 @@ const UNIV3_QUOTER_ABI = [
 const SUSHI_ROUTER_ABI = [
   "function getAmountsOut(uint256 amountIn, address[] calldata path) view returns (uint256[] memory amounts)",
 ];
-const CURVE_POOL_ABI = [
-  "function get_dy(int128 i, int128 j, uint256 dx) view returns (uint256)",
-];
+const CURVE_POOL_ABI = ["function get_dy(int128 i, int128 j, uint256 dx) view returns (uint256)"];
 
 class PriceQuoter {
   constructor({ providers, logger }) {
@@ -42,39 +40,16 @@ class PriceQuoter {
     };
   }
 
-  async quoteUniswapV3({
-    chainId,
-    quoter,
-    tokenIn,
-    tokenOut,
-    fee,
-    amountInWei,
-  }) {
-    const contract = this.getContract(
-      chainId,
-      quoter,
-      UNIV3_QUOTER_ABI,
-      "univ3quoter",
-    );
+  async quoteUniswapV3({ chainId, quoter, tokenIn, tokenOut, fee, amountInWei }) {
+    const contract = this.getContract(chainId, quoter, UNIV3_QUOTER_ABI, "univ3quoter");
     return withRetry(
       () => contract.quoteExactInputSingle.staticCall(tokenIn, tokenOut, fee, amountInWei, 0),
       this.rpcRetryOpts(`uniV3-quote-${chainId}`),
     );
   }
 
-  async quoteSushiV2({
-    chainId,
-    router,
-    tokenIn,
-    tokenOut,
-    amountInWei,
-  }) {
-    const contract = this.getContract(
-      chainId,
-      router,
-      SUSHI_ROUTER_ABI,
-      "sushirouter",
-    );
+  async quoteSushiV2({ chainId, router, tokenIn, tokenOut, amountInWei }) {
+    const contract = this.getContract(chainId, router, SUSHI_ROUTER_ABI, "sushirouter");
     return withRetry(
       async () => {
         const amounts = await contract.getAmountsOut(amountInWei, [tokenIn, tokenOut]);
@@ -84,13 +59,7 @@ class PriceQuoter {
     );
   }
 
-  async quoteCurve({
-    chainId,
-    pool,
-    tokenInIndex,
-    tokenOutIndex,
-    amountInWei,
-  }) {
+  async quoteCurve({ chainId, pool, tokenInIndex, tokenOutIndex, amountInWei }) {
     const contract = this.getContract(chainId, pool, CURVE_POOL_ABI, "curvepool");
     return withRetry(
       () => contract.get_dy(BigInt(tokenInIndex), BigInt(tokenOutIndex), amountInWei),
