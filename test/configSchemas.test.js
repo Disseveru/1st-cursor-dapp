@@ -105,6 +105,9 @@ describe("executionTemplatesSchema", () => {
     const valid = {
       arbitrageInnerSteps: [{ connector: "oneInch", method: "sell", args: ["a", "b"] }],
       liquidationInnerSteps: [],
+      liquidationInnerStepsByProtocol: {
+        "compound-v2": [{ connector: "compound", method: "liquidate", args: [] }],
+      },
       crossChainInnerSteps: [],
     };
     expect(executionTemplatesSchema.safeParse(valid).success).toBe(true);
@@ -114,6 +117,7 @@ describe("executionTemplatesSchema", () => {
     const result = executionTemplatesSchema.parse({});
     expect(result.arbitrageInnerSteps).toEqual([]);
     expect(result.liquidationInnerSteps).toEqual([]);
+    expect(result.liquidationInnerStepsByProtocol).toEqual({});
     expect(result.crossChainInnerSteps).toEqual([]);
   });
 });
@@ -164,5 +168,6 @@ describe("validateExecutionTemplates", () => {
   it("returns defaults for invalid input", () => {
     const result = validateExecutionTemplates("not-an-object", nullLogger);
     expect(result.arbitrageInnerSteps).toEqual([]);
+    expect(result.liquidationInnerStepsByProtocol).toEqual({});
   });
 });
