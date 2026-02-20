@@ -1,0 +1,6 @@
+node_modules/
+.env
+.encrypted_key
+*.log
+dist/
+coverage/
