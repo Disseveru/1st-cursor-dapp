@@ -84,22 +84,49 @@ class SpellBuilder {
     };
   }
 
-  templateForOpportunity(opportunityType) {
-    if (opportunityType === "arbitrage") {
-      return this.config.execution.templates.arbitrageInnerSteps || [];
+  templateForOpportunity(opportunityOrType) {
+    const templates = this.config.execution.templates || {};
+    const type =
+      typeof opportunityOrType === "string"
+        ? opportunityOrType
+        : opportunityOrType?.type;
+
+    if (type === "arbitrage") {
+      return templates.arbitrageInnerSteps || [];
     }
-    if (opportunityType === "liquidation") {
-      return this.config.execution.templates.liquidationInnerSteps || [];
+
+    if (type === "liquidation") {
+      const protocol =
+        typeof opportunityOrType === "object" && opportunityOrType !== null
+          ? opportunityOrType.protocol
+          : undefined;
+      const byProtocol = templates.liquidationInnerStepsByProtocol || {};
+
+      if (protocol) {
+        const template = byProtocol[protocol];
+        if (Array.isArray(template) && template.length > 0) {
+          return template;
+        }
+        if (Object.keys(byProtocol).length > 0) {
+          throw new Error(
+            `No execution template configured for liquidation protocol: ${protocol}`,
+          );
+        }
+      }
+
+      return templates.liquidationInnerSteps || [];
     }
-    if (opportunityType === "cross-chain") {
-      return this.config.execution.templates.crossChainInnerSteps || [];
+
+    if (type === "cross-chain") {
+      return templates.crossChainInnerSteps || [];
     }
+
     return [];
   }
 
   buildFlashloanSpell(opportunity) {
     const context = this.buildContext(opportunity);
-    const templateSteps = this.templateForOpportunity(opportunity.type);
+    const templateSteps = this.templateForOpportunity(opportunity);
     if (!templateSteps.length) {
       throw new Error(`No execution template configured for opportunity type: ${opportunity.type}`);
     }
