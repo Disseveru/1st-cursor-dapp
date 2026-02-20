@@ -1,96 +1,72 @@
-const RISK_PROFILES = [
-  {
-    id: "conservative",
-    name: "Conservative",
-    summary: "Focuses on larger spreads and stronger gas buffers.",
-    recommendedConfig: {
-      MIN_PROFIT_ETH: "0.01",
-      GAS_MULTIPLIER: "1.25",
-      GAS_KILL_SWITCH_ETH: "0.08",
-      POLL_INTERVAL_MS: "4000",
-    },
-  },
-  {
-    id: "balanced",
-    name: "Balanced",
-    summary: "Default profile for mixed opportunity flow.",
-    recommendedConfig: {
-      MIN_PROFIT_ETH: "0.004",
-      GAS_MULTIPLIER: "1.15",
-      GAS_KILL_SWITCH_ETH: "0.05",
-      POLL_INTERVAL_MS: "2500",
-    },
-  },
-  {
-    id: "aggressive",
-    name: "Aggressive",
-    summary: "Targets more opportunities with tighter margins and faster polling.",
-    recommendedConfig: {
-      MIN_PROFIT_ETH: "0.0015",
-      GAS_MULTIPLIER: "1.08",
-      GAS_KILL_SWITCH_ETH: "0.03",
-      POLL_INTERVAL_MS: "1200",
-    },
-  },
-];
-
-function getRiskProfiles() {
-  return RISK_PROFILES.map((profile) => ({
-    ...profile,
-    recommendedConfig: { ...profile.recommendedConfig },
-  }));
-}
-
-function getRiskProfileById(id) {
-  if (!id) return null;
-  const match = RISK_PROFILES.find((profile) => profile.id === String(id).toLowerCase());
-  if (!match) return null;
-  return {
-    ...match,
-    recommendedConfig: { ...match.recommendedConfig },
-  };
-}
-
-module.exports = {
-  getRiskProfiles,
-  getRiskProfileById,
-};
 const RISK_PROFILES = Object.freeze({
   conservative: {
     id: "conservative",
+    name: "Conservative",
     title: "Conservative",
-    description:
-      "Higher profit filter and higher gas reserve to reduce failed execution risk.",
+    summary: "Focuses on larger spreads and stronger gas buffers.",
+    description: "Higher profit filter and higher gas reserve to reduce failed execution risk.",
     minProfitEth: 0.005,
     gasKillSwitchEth: 0.08,
     gasMultiplier: 1.1,
+    pollIntervalMs: 4000,
   },
   balanced: {
     id: "balanced",
+    name: "Balanced",
     title: "Balanced",
+    summary: "Default profile for mixed opportunity flow.",
     description: "Moderate profit filter and reserve thresholds for daily operation.",
     minProfitEth: 0.003,
     gasKillSwitchEth: 0.05,
     gasMultiplier: 1.15,
+    pollIntervalMs: 2500,
   },
   aggressive: {
     id: "aggressive",
+    name: "Aggressive",
     title: "Aggressive",
-    description:
-      "Lower profit threshold and smaller reserve buffer to capture more opportunities.",
+    summary: "Targets more opportunities with tighter margins and faster polling.",
+    description: "Lower profit threshold and smaller reserve buffer to capture more opportunities.",
     minProfitEth: 0.001,
     gasKillSwitchEth: 0.03,
     gasMultiplier: 1.2,
+    pollIntervalMs: 1200,
   },
 });
 
+function toPublicProfile(profile) {
+  return {
+    id: profile.id,
+    name: profile.name,
+    title: profile.title,
+    summary: profile.summary,
+    description: profile.description,
+    minProfitEth: profile.minProfitEth,
+    gasKillSwitchEth: profile.gasKillSwitchEth,
+    gasMultiplier: profile.gasMultiplier,
+    pollIntervalMs: profile.pollIntervalMs,
+    recommendedConfig: {
+      MIN_PROFIT_ETH: String(profile.minProfitEth),
+      GAS_KILL_SWITCH_ETH: String(profile.gasKillSwitchEth),
+      GAS_MULTIPLIER: String(profile.gasMultiplier),
+      POLL_INTERVAL_MS: String(profile.pollIntervalMs),
+    },
+  };
+}
+
 function getRiskProfile(profileName) {
   if (!profileName || profileName === "custom") return null;
-  return RISK_PROFILES[profileName] || null;
+  const key = String(profileName).toLowerCase();
+  const profile = RISK_PROFILES[key];
+  return profile ? toPublicProfile(profile) : null;
+}
+
+function getRiskProfileById(id) {
+  return getRiskProfile(id);
 }
 
 function getRiskProfiles() {
-  return Object.values(RISK_PROFILES);
+  return Object.values(RISK_PROFILES).map(toPublicProfile);
 }
 
 function applyRiskProfile({ profileName, env, riskConfig }) {
@@ -123,6 +99,7 @@ function applyRiskProfile({ profileName, env, riskConfig }) {
 module.exports = {
   RISK_PROFILES,
   getRiskProfile,
+  getRiskProfileById,
   getRiskProfiles,
   applyRiskProfile,
 };
