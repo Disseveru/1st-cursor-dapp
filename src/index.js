@@ -10,6 +10,7 @@ const { SpellBuilder } = require("./spellBuilder");
 const { FlashbotsExecutor } = require("./flashbotsExecutor");
 const { ExecutionEngine } = require("./executionEngine");
 const { AvocadoBalanceFetcher } = require("./avocadoBalanceFetcher");
+const { StatusReporter } = require("./statusReporter");
 const { SearcherBot } = require("./bot");
 
 function parseFlags(argv) {
@@ -96,6 +97,8 @@ async function bootstrap() {
     logger,
   });
 
+  const statusReporter = new StatusReporter({ logger });
+
   const bot = new SearcherBot({
     config,
     mainProvider,
@@ -103,6 +106,7 @@ async function bootstrap() {
     liquidationMonitor,
     crossChainMonitor,
     executionEngine,
+    statusReporter,
     logger,
   });
 
