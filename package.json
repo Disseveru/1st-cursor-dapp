@@ -8,6 +8,7 @@
     "start:once": "node src/index.js --once",
     "dry-run": "node src/index.js --dry-run --once",
     "check": "node -e \"require('./src/index.js')\"",
+    "test": "node --test",
     "encrypt:key": "node scripts/encrypt-env.js"
   },
   "repository": {
