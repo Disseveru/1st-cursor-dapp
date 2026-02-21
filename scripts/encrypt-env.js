@@ -19,10 +19,8 @@ function usage() {
 }
 
 function main() {
-  const privateKey =
-    process.env.HOT_WALLET_PRIVATE_KEY || readArg("--private-key");
-  const passphrase =
-    process.env.ENV_ENCRYPTION_PASSPHRASE || readArg("--passphrase");
+  const privateKey = process.env.HOT_WALLET_PRIVATE_KEY || readArg("--private-key");
+  const passphrase = process.env.ENV_ENCRYPTION_PASSPHRASE || readArg("--passphrase");
 
   if (!privateKey || !passphrase) {
     usage();

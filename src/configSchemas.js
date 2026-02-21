@@ -93,9 +93,7 @@ const spellStepSchema = z.object({
 const executionTemplatesSchema = z.object({
   arbitrageInnerSteps: z.array(spellStepSchema).default([]),
   liquidationInnerSteps: z.array(spellStepSchema).default([]),
-  liquidationInnerStepsByProtocol: z
-    .record(z.string(), z.array(spellStepSchema))
-    .default({}),
+  liquidationInnerStepsByProtocol: z.record(z.string(), z.array(spellStepSchema)).default({}),
   crossChainInnerSteps: z.array(spellStepSchema).default([]),
 });
 

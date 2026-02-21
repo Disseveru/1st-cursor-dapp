@@ -87,9 +87,7 @@ class SpellBuilder {
   templateForOpportunity(opportunityOrType) {
     const templates = this.config.execution.templates || {};
     const type =
-      typeof opportunityOrType === "string"
-        ? opportunityOrType
-        : opportunityOrType?.type;
+      typeof opportunityOrType === "string" ? opportunityOrType : opportunityOrType?.type;
 
     if (type === "arbitrage") {
       return templates.arbitrageInnerSteps || [];
@@ -108,9 +106,7 @@ class SpellBuilder {
           return template;
         }
         if (Object.keys(byProtocol).length > 0) {
-          throw new Error(
-            `No execution template configured for liquidation protocol: ${protocol}`,
-          );
+          throw new Error(`No execution template configured for liquidation protocol: ${protocol}`);
         }
       }
 

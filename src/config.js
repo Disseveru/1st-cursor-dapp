@@ -167,11 +167,7 @@ async function loadConfig({ logger, cliFlags }) {
   );
   const liquidationPositions = validateLiquidationPositions(rawLiquidationPositions, logger);
 
-  const rawCrossChainPairs = parseJSON(
-    env.CROSS_CHAIN_PAIRS_JSON,
-    [],
-    "CROSS_CHAIN_PAIRS_JSON",
-  );
+  const rawCrossChainPairs = parseJSON(env.CROSS_CHAIN_PAIRS_JSON, [], "CROSS_CHAIN_PAIRS_JSON");
   const crossChainPairs = validateCrossChainPairs(rawCrossChainPairs, logger);
 
   const rawExecutionTemplates = parseJSON(
@@ -179,10 +175,7 @@ async function loadConfig({ logger, cliFlags }) {
     DEFAULT_EXECUTION_TEMPLATES,
     "EXECUTION_TEMPLATES_JSON",
   );
-  const validatedExecutionTemplates = validateExecutionTemplates(
-    rawExecutionTemplates,
-    logger,
-  );
+  const validatedExecutionTemplates = validateExecutionTemplates(rawExecutionTemplates, logger);
   const executionTemplates = {
     ...DEFAULT_EXECUTION_TEMPLATES,
     ...validatedExecutionTemplates,

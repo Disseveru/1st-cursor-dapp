@@ -36,10 +36,7 @@ async function withRetry(
         try {
           onRetry(retryEvent);
         } catch (observerError) {
-          logger?.debug(
-            { label, error: observerError.message },
-            "Retry observer callback failed",
-          );
+          logger?.debug({ label, error: observerError.message }, "Retry observer callback failed");
         }
       }
       if (logger) {
