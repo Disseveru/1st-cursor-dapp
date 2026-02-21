@@ -77,7 +77,7 @@ class SearcherBot {
         try {
           const result = await this.executionEngine.executeOpportunity(opp);
           if (result?.executed) {
-            this.statusReporter?.recordExecution(opp.label);
+            this.statusReporter?.recordExecution(opp.label, opp.expectedProfitEthWei || 0n);
             break;
           }
           if (result?.reason === "dry-run") {

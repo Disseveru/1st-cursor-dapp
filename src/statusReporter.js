@@ -1,3 +1,5 @@
+const { formatEther } = require("ethers");
+
 class StatusReporter {
   constructor({ logger }) {
     this.logger = logger;
@@ -8,6 +10,8 @@ class StatusReporter {
     this.lastCycleAt = null;
     this.lastExecutionAt = null;
     this.lastExecutionLabel = null;
+    this.lastExecutionProfitEthWei = null;
+    this.realizedProfitEthWei = 0n;
     this.killSwitchActivated = false;
     this.errors = 0;
     this.retries = 0;
@@ -26,10 +30,15 @@ class StatusReporter {
     this.opportunitiesFound += count;
   }
 
-  recordExecution(label) {
+  recordExecution(label, expectedProfitEthWei = null) {
     this.opportunitiesExecuted++;
     this.lastExecutionAt = new Date();
     this.lastExecutionLabel = label;
+
+    if (typeof expectedProfitEthWei === "bigint" && expectedProfitEthWei >= 0n) {
+      this.lastExecutionProfitEthWei = expectedProfitEthWei;
+      this.realizedProfitEthWei += expectedProfitEthWei;
+    }
   }
 
   recordError() {
@@ -59,6 +68,13 @@ class StatusReporter {
       lastCycleAt: this.lastCycleAt?.toISOString() ?? null,
       lastExecutionAt: this.lastExecutionAt?.toISOString() ?? null,
       lastExecutionLabel: this.lastExecutionLabel,
+      lastExecutionProfitEthWei: this.lastExecutionProfitEthWei?.toString() ?? null,
+      lastExecutionProfitEth:
+        this.lastExecutionProfitEthWei === null
+          ? null
+          : formatEther(this.lastExecutionProfitEthWei),
+      realizedProfitEthWei: this.realizedProfitEthWei.toString(),
+      realizedProfitEth: formatEther(this.realizedProfitEthWei),
       killSwitchActivated: this.killSwitchActivated,
       errors: this.errors,
       retries: this.retries,

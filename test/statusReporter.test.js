@@ -1,4 +1,5 @@
 const { StatusReporter } = require("../src/statusReporter");
+const { parseEther } = require("ethers");
 
 const nullLogger = {
   debug: jest.fn(),
@@ -24,6 +25,8 @@ describe("StatusReporter", () => {
     expect(status.retries).toBe(0);
     expect(status.killSwitchActivated).toBe(false);
     expect(status.startedAt).toBeNull();
+    expect(status.realizedProfitEthWei).toBe("0");
+    expect(status.realizedProfitEth).toBe("0.0");
   });
 
   it("records start time", () => {
@@ -45,12 +48,14 @@ describe("StatusReporter", () => {
     expect(reporter.getStatus().opportunitiesFound).toBe(5);
   });
 
-  it("tracks execution with label", () => {
-    reporter.recordExecution("arb-dai-usdc");
+  it("tracks execution with label and realized profit", () => {
+    reporter.recordExecution("arb-dai-usdc", parseEther("0.01"));
     const status = reporter.getStatus();
     expect(status.opportunitiesExecuted).toBe(1);
     expect(status.lastExecutionLabel).toBe("arb-dai-usdc");
     expect(status.lastExecutionAt).toBeTruthy();
+    expect(status.lastExecutionProfitEth).toBe("0.01");
+    expect(status.realizedProfitEth).toBe("0.01");
   });
 
   it("counts errors", () => {

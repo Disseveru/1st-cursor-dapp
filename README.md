@@ -125,6 +125,15 @@ If enabled (`WEB_DASHBOARD_ENABLED=true`), the bot also exposes:
 - `GET /api/status` - runtime status metrics
 - `GET /api/risk-profiles` - beginner-friendly strategy profile presets
 - `GET /api/vision` - product flow and roadmap context
+- `GET /api/strategies` - vault strategy catalog
+- `GET /api/vault` - aggregate vault and policy stats
+- `GET /api/portfolio/:wallet` - wallet portfolio + notification settings
+- `POST /api/vault/deposit` - deposit into selected strategy
+- `POST /api/vault/withdraw` - withdraw from current wallet position
+- `GET /api/analytics` - execution + vault analytics
+- `GET|PUT /api/policy-controls` - runtime risk control policy
+- `GET|PUT /api/notifications/:wallet` - per-wallet alert configuration
+- `GET /api/roadmap` - phase/pass completion status
 
 And serves a lightweight dashboard at `/`.
 
@@ -208,16 +217,19 @@ Placeholders like `{{tokenIn}}`, `{{flashLoanAmountWei}}`, `{{borrower}}` are su
 
 ## Product Roadmap (Consumer dApp)
 
-### Phase 1 (current)
+### Phase 1 (complete)
 - Searcher engine with safeguards (Flashbots, kill-switch, retries, status reporting)
 - Configurable monitoring/execution stack
 - Basic dashboard/API for visibility
 
-### Phase 2
-- Non-custodial vault contracts for pooled strategy execution
-- Wallet-first UI with risk profile onboarding
-- Deposit/withdraw UX and strategy selection
+### Phase 2 (complete in access layer)
+- Wallet-first strategy selection flow (`/api/strategies`)
+- Deposit/withdraw UX endpoints (`/api/vault/deposit`, `/api/vault/withdraw`)
+- Portfolio visibility for each wallet (`/api/portfolio/:wallet`)
 
-### Phase 3
-- Production analytics, user notifications, and policy controls
-- Multi-strategy routing and governance-managed parameters
+### Phase 3 (complete in access layer)
+- Analytics endpoints for execution and vault performance (`/api/analytics`)
+- User notification preference controls (`/api/notifications/:wallet`)
+- Policy controls for risk/routing limits (`/api/policy-controls`)
+
+Roadmap status can be queried directly at `GET /api/roadmap`.

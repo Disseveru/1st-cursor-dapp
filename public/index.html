@@ -3,8 +3,11 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Instadapp Searcher Dashboard</title>
+    <title>Instadapp Consumer dApp Dashboard</title>
     <style>
+      :root {
+        color-scheme: dark;
+      }
       body {
         margin: 0;
         font-family: Arial, sans-serif;
@@ -12,9 +15,13 @@
         color: #e2e8f0;
       }
       main {
-        max-width: 920px;
-        margin: 32px auto;
-        padding: 0 16px;
+        max-width: 980px;
+        margin: 28px auto;
+        padding: 0 16px 40px;
+      }
+      h1,
+      h2 {
+        margin-top: 0;
       }
       .card {
         background: #111827;
@@ -23,14 +30,10 @@
         padding: 16px;
         margin-bottom: 16px;
       }
-      h1,
-      h2 {
-        margin-top: 0;
-      }
-      code {
-        background: #1f2937;
-        padding: 2px 6px;
-        border-radius: 6px;
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 12px;
       }
       pre {
         white-space: pre-wrap;
@@ -38,6 +41,8 @@
         background: #030712;
         border-radius: 8px;
         padding: 12px;
+        max-height: 280px;
+        overflow: auto;
       }
       .ok {
         color: #22c55e;
@@ -45,75 +50,354 @@
       .warn {
         color: #f59e0b;
       }
+      .error {
+        color: #ef4444;
+      }
+      .row {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+      label {
+        display: block;
+        font-size: 12px;
+        color: #94a3b8;
+        margin-bottom: 4px;
+      }
+      input,
+      select,
+      button {
+        background: #0b1220;
+        border: 1px solid #334155;
+        color: #e2e8f0;
+        border-radius: 8px;
+        padding: 9px 10px;
+        font-size: 14px;
+      }
+      input,
+      select {
+        min-width: 220px;
+      }
+      button {
+        cursor: pointer;
+      }
+      button:hover {
+        border-color: #60a5fa;
+      }
+      .muted {
+        color: #94a3b8;
+      }
+      code {
+        background: #1f2937;
+        padding: 2px 6px;
+        border-radius: 6px;
+      }
     </style>
   </head>
   <body>
     <main>
-      <h1>Instadapp Searcher Bot Dashboard</h1>
-      <div class="card">
-        <h2>Project Vision</h2>
-        <p>
-          Build a user-friendly DeFi product where everyday users can connect a wallet, choose risk
-          settings, and use non-custodial strategy vaults powered by automated searchers.
-        </p>
-        <p class="warn">
-          Current status: engine + monitoring + execution backend are live. Consumer vault UI flow is
-          in progress.
-        </p>
-      </div>
+      <h1>Instadapp Consumer dApp Dashboard</h1>
+      <p class="muted">
+        All roadmap passes are exposed here: strategy selection, vault deposit/withdraw, portfolio
+        tracking, analytics, notifications, and policy controls.
+      </p>
 
       <div class="card">
-        <h2>Health</h2>
+        <h2>System Health</h2>
         <p id="health">Loading...</p>
+        <pre id="roadmap">Loading roadmap...</pre>
       </div>
 
       <div class="card">
-        <h2>Bot Status</h2>
-        <pre id="status">Loading...</pre>
+        <h2>Wallet Operations</h2>
+        <div class="row">
+          <div>
+            <label for="walletInput">Wallet Address</label>
+            <input
+              id="walletInput"
+              placeholder="0x1234...abcd"
+              value="0x000000000000000000000000000000000000dead"
+            />
+          </div>
+          <div>
+            <label for="strategySelect">Strategy</label>
+            <select id="strategySelect"></select>
+          </div>
+          <div>
+            <label for="amountInput">Amount (ETH)</label>
+            <input id="amountInput" value="0.05" />
+          </div>
+          <div style="padding-top: 18px">
+            <button id="refreshWalletBtn">Refresh Wallet</button>
+            <button id="depositBtn">Deposit</button>
+            <button id="withdrawBtn">Withdraw</button>
+          </div>
+        </div>
+        <p id="walletActionResult" class="muted">No action yet.</p>
+        <pre id="portfolio">Loading portfolio...</pre>
+      </div>
+
+      <div class="grid">
+        <div class="card">
+          <h2>Vault</h2>
+          <pre id="vaultStats">Loading vault stats...</pre>
+        </div>
+        <div class="card">
+          <h2>Analytics</h2>
+          <pre id="analytics">Loading analytics...</pre>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="card">
+          <h2>Policy Controls</h2>
+          <div class="row">
+            <div>
+              <label for="minDepositInput">Min Deposit ETH</label>
+              <input id="minDepositInput" />
+            </div>
+            <div>
+              <label for="maxDepositInput">Max Deposit / Wallet ETH</label>
+              <input id="maxDepositInput" />
+            </div>
+            <div>
+              <label for="maxWithdrawInput">Max Withdraw / Request ETH</label>
+              <input id="maxWithdrawInput" />
+            </div>
+            <div>
+              <label for="aggressiveToggle">Allow Aggressive Strategy</label>
+              <select id="aggressiveToggle">
+                <option value="true">true</option>
+                <option value="false">false</option>
+              </select>
+            </div>
+            <div style="padding-top: 18px">
+              <button id="savePolicyBtn">Save Policy</button>
+            </div>
+          </div>
+          <pre id="policy">Loading policy controls...</pre>
+        </div>
+
+        <div class="card">
+          <h2>Notifications</h2>
+          <p class="muted">
+            Save alert settings for the wallet above. Supports bot execution and error alerts.
+          </p>
+          <div class="row">
+            <div>
+              <label for="notifyEnabled">Enabled</label>
+              <select id="notifyEnabled">
+                <option value="false">false</option>
+                <option value="true">true</option>
+              </select>
+            </div>
+            <div>
+              <label for="notifyMinProfit">Min Profit Alert ETH</label>
+              <input id="notifyMinProfit" value="0.01" />
+            </div>
+            <div>
+              <label for="notifyWebhook">Webhook URL (optional)</label>
+              <input id="notifyWebhook" placeholder="https://..." />
+            </div>
+            <div style="padding-top: 18px">
+              <button id="saveNotifyBtn">Save Notifications</button>
+            </div>
+          </div>
+          <pre id="notifications">Loading notifications...</pre>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="card">
+          <h2>Bot Status</h2>
+          <pre id="status">Loading...</pre>
+        </div>
+        <div class="card">
+          <h2>Risk Profiles</h2>
+          <pre id="profiles">Loading...</pre>
+        </div>
       </div>
 
       <div class="card">
-        <h2>Risk Profiles</h2>
-        <pre id="profiles">Loading...</pre>
-      </div>
-
-      <div class="card">
-        <h2>Quick Start for Users (Managed Mode)</h2>
+        <h2>Quick Start</h2>
         <ol>
-          <li>Connect wallet in the consumer dApp (next phase).</li>
-          <li>Pick a profile: <code>conservative</code>, <code>balanced</code>, or <code>aggressive</code>.</li>
-          <li>Deposit in non-custodial vault contract.</li>
-          <li>Track PnL and withdraw at any time.</li>
+          <li>Use a dedicated gas wallet and connect it here.</li>
+          <li>Select your strategy vault and deposit a small amount first.</li>
+          <li>Monitor <code>/api/analytics</code> and <code>/api/portfolio/:wallet</code>.</li>
+          <li>Withdraw anytime with policy-safe limits.</li>
         </ol>
       </div>
     </main>
 
     <script>
-      async function loadJson(url) {
-        const response = await fetch(url);
-        if (!response.ok) {
-          throw new Error(`${url} failed: ${response.status}`);
-        }
-        return response.json();
+      const walletInput = document.getElementById("walletInput");
+      const strategySelect = document.getElementById("strategySelect");
+      const amountInput = document.getElementById("amountInput");
+
+      function setText(id, value) {
+        document.getElementById(id).textContent =
+          typeof value === "string" ? value : JSON.stringify(value, null, 2);
       }
 
-      async function refresh() {
+      async function requestJson(url, options) {
+        const response = await fetch(url, options);
+        const text = await response.text();
+        let payload;
         try {
-          const health = await loadJson("/health");
-          document.getElementById("health").innerHTML = `<span class="ok">ok=${health.ok}</span>`;
+          payload = text ? JSON.parse(text) : {};
+        } catch (_error) {
+          payload = { ok: false, error: text };
+        }
+        if (!response.ok || payload.ok === false) {
+          throw new Error(payload.error || `${url} failed (${response.status})`);
+        }
+        return payload;
+      }
 
-          const status = await loadJson("/api/status");
-          document.getElementById("status").textContent = JSON.stringify(status, null, 2);
+      async function refreshSystem() {
+        const [health, roadmap, status, profiles, strategies, vault, analytics, policy] =
+          await Promise.all([
+            requestJson("/health"),
+            requestJson("/api/roadmap"),
+            requestJson("/api/status"),
+            requestJson("/api/risk-profiles"),
+            requestJson("/api/strategies"),
+            requestJson("/api/vault"),
+            requestJson("/api/analytics"),
+            requestJson("/api/policy-controls"),
+          ]);
 
-          const profiles = await loadJson("/api/risk-profiles");
-          document.getElementById("profiles").textContent = JSON.stringify(profiles, null, 2);
-        } catch (error) {
-          document.getElementById("health").textContent = `Error: ${error.message}`;
+        document.getElementById("health").innerHTML = `<span class="ok">ok=${health.ok}</span>`;
+        setText("roadmap", roadmap.data);
+        setText("status", status.status);
+        setText("profiles", profiles.data);
+        setText("vaultStats", vault.data);
+        setText("analytics", analytics.data);
+        setText("policy", policy.data);
+
+        document.getElementById("minDepositInput").value = policy.data.minDepositEth;
+        document.getElementById("maxDepositInput").value = policy.data.maxDepositEthPerWallet;
+        document.getElementById("maxWithdrawInput").value = policy.data.maxWithdrawalEthPerRequest;
+        document.getElementById("aggressiveToggle").value = String(policy.data.allowAggressiveStrategy);
+
+        const previousValue = strategySelect.value;
+        strategySelect.innerHTML = "";
+        for (const strategy of strategies.data) {
+          const option = document.createElement("option");
+          option.value = strategy.id;
+          option.textContent = `${strategy.name} (${strategy.riskProfileId})`;
+          strategySelect.appendChild(option);
+        }
+        if (previousValue) {
+          strategySelect.value = previousValue;
         }
       }
 
-      refresh();
-      setInterval(refresh, 5000);
+      async function refreshWalletState() {
+        const wallet = walletInput.value.trim();
+        if (!wallet) return;
+        const portfolio = await requestJson(`/api/portfolio/${wallet}`);
+        setText("portfolio", portfolio.data);
+
+        document.getElementById("notifyEnabled").value = String(portfolio.data.notifications.enabled);
+        document.getElementById("notifyMinProfit").value = portfolio.data.notifications.minProfitAlertEth;
+        document.getElementById("notifyWebhook").value = portfolio.data.notifications.webhookUrl || "";
+        if (portfolio.data.portfolio.strategyId) {
+          strategySelect.value = portfolio.data.portfolio.strategyId;
+        }
+        setText("notifications", portfolio.data.notifications);
+      }
+
+      async function runDeposit() {
+        const wallet = walletInput.value.trim();
+        const amountEth = amountInput.value.trim();
+        const strategyId = strategySelect.value;
+        const result = await requestJson("/api/vault/deposit", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ wallet, amountEth, strategyId }),
+        });
+        setText("walletActionResult", `Deposit complete: ${result.data.amountEth} ETH`);
+        await refreshSystem();
+        await refreshWalletState();
+      }
+
+      async function runWithdraw() {
+        const wallet = walletInput.value.trim();
+        const amountEth = amountInput.value.trim();
+        const result = await requestJson("/api/vault/withdraw", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ wallet, amountEth }),
+        });
+        setText("walletActionResult", `Withdraw complete: ${result.data.amountEth} ETH`);
+        await refreshSystem();
+        await refreshWalletState();
+      }
+
+      async function savePolicy() {
+        const payload = {
+          minDepositEth: document.getElementById("minDepositInput").value.trim(),
+          maxDepositEthPerWallet: document.getElementById("maxDepositInput").value.trim(),
+          maxWithdrawalEthPerRequest: document.getElementById("maxWithdrawInput").value.trim(),
+          allowAggressiveStrategy:
+            document.getElementById("aggressiveToggle").value.trim() === "true",
+        };
+        await requestJson("/api/policy-controls", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        setText("walletActionResult", "Policy controls updated.");
+        await refreshSystem();
+      }
+
+      async function saveNotifications() {
+        const wallet = walletInput.value.trim();
+        const payload = {
+          enabled: document.getElementById("notifyEnabled").value === "true",
+          minProfitAlertEth: document.getElementById("notifyMinProfit").value.trim(),
+          webhookUrl: document.getElementById("notifyWebhook").value.trim(),
+        };
+        const updated = await requestJson(`/api/notifications/${wallet}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        setText("notifications", updated.data);
+        setText("walletActionResult", "Notification settings saved.");
+      }
+
+      function showError(error) {
+        const healthElement = document.getElementById("health");
+        healthElement.innerHTML = `<span class="error">Error: ${error.message}</span>`;
+        setText("walletActionResult", `Error: ${error.message}`);
+      }
+
+      document.getElementById("refreshWalletBtn").addEventListener("click", () => {
+        refreshWalletState().catch(showError);
+      });
+      document.getElementById("depositBtn").addEventListener("click", () => {
+        runDeposit().catch(showError);
+      });
+      document.getElementById("withdrawBtn").addEventListener("click", () => {
+        runWithdraw().catch(showError);
+      });
+      document.getElementById("savePolicyBtn").addEventListener("click", () => {
+        savePolicy().catch(showError);
+      });
+      document.getElementById("saveNotifyBtn").addEventListener("click", () => {
+        saveNotifications().catch(showError);
+      });
+
+      async function refreshAll() {
+        await refreshSystem();
+        await refreshWalletState();
+      }
+
+      refreshAll().catch(showError);
+      setInterval(() => refreshSystem().catch(showError), 5000);
     </script>
   </body>
 </html>
