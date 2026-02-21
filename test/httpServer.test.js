@@ -49,6 +49,11 @@ describe("httpServer", () => {
       const profiles = await fetch(`${baseUrl}/api/risk-profiles`).then((r) => r.json());
       expect(profiles.ok).toBe(true);
       expect(profiles.data.length).toBeGreaterThan(0);
+
+      const roadmap = await fetch(`${baseUrl}/api/roadmap`).then((r) => r.json());
+      expect(roadmap.ok).toBe(true);
+      expect(roadmap.data.currentPhase).toBe(2);
+      expect(roadmap.data.phases[0].status).toBe("complete");
     } finally {
       await serverHandle.close();
     }

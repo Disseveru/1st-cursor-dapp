@@ -11,6 +11,7 @@ async function withRetry(
     shouldRetry = () => true,
     label = "operation",
     logger = null,
+    onRetry = null,
   } = {},
 ) {
   let lastError;
@@ -24,11 +25,25 @@ async function withRetry(
       }
       const jitter = Math.random() * 0.3 + 0.85;
       const delay = Math.min(baseDelayMs * 2 ** (attempt - 1) * jitter, maxDelayMs);
+      const retryEvent = {
+        label,
+        attempt,
+        maxAttempts,
+        delayMs: Math.round(delay),
+        error: error.message,
+      };
+      if (typeof onRetry === "function") {
+        try {
+          onRetry(retryEvent);
+        } catch (observerError) {
+          logger?.debug(
+            { label, error: observerError.message },
+            "Retry observer callback failed",
+          );
+        }
+      }
       if (logger) {
-        logger.debug(
-          { label, attempt, maxAttempts, delayMs: Math.round(delay), error: error.message },
-          "Retrying after transient failure",
-        );
+        logger.debug(retryEvent, "Retrying after transient failure");
       }
       await sleep(delay);
     }

@@ -26,6 +26,8 @@ async function bootstrap() {
   const bootstrapLogger = createLogger(process.env.LOG_LEVEL || "info");
   const config = await loadConfig({ logger: bootstrapLogger, cliFlags });
   const logger = createLogger(config.app.logLevel);
+  const statusReporter = new StatusReporter({ logger });
+  const onRetry = () => statusReporter.recordRetry();
 
   const providers = createProviderMap(config.providers.chainRpcUrls);
   const mainProvider = providers[1];
@@ -41,7 +43,7 @@ async function bootstrap() {
     logger,
   });
 
-  const quoter = new PriceQuoter({ providers, logger });
+  const quoter = new PriceQuoter({ providers, logger, onRetry });
 
   let avocadoBalanceFetcher = null;
   if (config.avocado.enabled) {
@@ -96,9 +98,9 @@ async function bootstrap() {
     spellBuilder,
     flashbotsExecutor,
     logger,
+    onRetry,
   });
 
-  const statusReporter = new StatusReporter({ logger });
   let httpServer = null;
 
   if (config.app.webDashboardEnabled) {

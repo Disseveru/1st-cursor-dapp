@@ -2,7 +2,16 @@ const { formatEther, parseEther } = require("ethers");
 const { withRetry, isTransientRpcError } = require("./utils");
 
 class ExecutionEngine {
-  constructor({ config, dsa, signerAddress, provider, spellBuilder, flashbotsExecutor, logger }) {
+  constructor({
+    config,
+    dsa,
+    signerAddress,
+    provider,
+    spellBuilder,
+    flashbotsExecutor,
+    logger,
+    onRetry,
+  }) {
     this.config = config;
     this.dsa = dsa;
     this.signerAddress = signerAddress;
@@ -10,6 +19,7 @@ class ExecutionEngine {
     this.spellBuilder = spellBuilder;
     this.flashbotsExecutor = flashbotsExecutor;
     this.logger = logger;
+    this.onRetry = onRetry;
     this.halted = false;
   }
 
@@ -20,6 +30,7 @@ class ExecutionEngine {
       shouldRetry: isTransientRpcError,
       label,
       logger: this.logger,
+      onRetry: this.onRetry,
     };
   }
 

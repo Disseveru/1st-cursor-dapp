@@ -11,9 +11,10 @@ const SUSHI_ROUTER_ABI = [
 const CURVE_POOL_ABI = ["function get_dy(int128 i, int128 j, uint256 dx) view returns (uint256)"];
 
 class PriceQuoter {
-  constructor({ providers, logger }) {
+  constructor({ providers, logger, onRetry }) {
     this.providers = providers;
     this.logger = logger;
+    this.onRetry = onRetry;
     this.contracts = new Map();
   }
 
@@ -37,6 +38,7 @@ class PriceQuoter {
       shouldRetry: isTransientRpcError,
       label,
       logger: this.logger,
+      onRetry: this.onRetry,
     };
   }
 

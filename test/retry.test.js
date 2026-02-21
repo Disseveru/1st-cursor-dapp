@@ -73,6 +73,36 @@ describe("withRetry", () => {
       "Retrying after transient failure",
     );
   });
+
+  it("calls onRetry observer with retry metadata", async () => {
+    let attempt = 0;
+    const onRetry = jest.fn();
+    const fn = jest.fn(async () => {
+      attempt++;
+      if (attempt < 2) {
+        const err = new Error("timeout");
+        err.code = "TIMEOUT";
+        throw err;
+      }
+      return "ok";
+    });
+
+    await withRetry(fn, {
+      maxAttempts: 3,
+      baseDelayMs: 1,
+      label: "rpc-call",
+      onRetry,
+      shouldRetry: () => true,
+    });
+
+    expect(onRetry).toHaveBeenCalledWith(
+      expect.objectContaining({
+        label: "rpc-call",
+        attempt: 1,
+        maxAttempts: 3,
+      }),
+    );
+  });
 });
 
 describe("isTransientRpcError", () => {

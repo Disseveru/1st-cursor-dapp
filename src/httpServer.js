@@ -2,6 +2,38 @@ const express = require("express");
 const path = require("path");
 const { getRiskProfiles, getRiskProfileById } = require("./riskProfiles");
 
+const ROADMAP_PHASES = Object.freeze([
+  {
+    phase: 1,
+    title: "Searcher engine foundation",
+    status: "complete",
+    items: [
+      "Safeguards: Flashbots private relay, kill-switch, retry handling, and status reporting",
+      "Configurable monitoring/execution stack for arbitrage, liquidation, and cross-chain checks",
+      "Operator visibility through dashboard + API endpoints",
+    ],
+  },
+  {
+    phase: 2,
+    title: "Consumer vault UX + contracts",
+    status: "next",
+    items: [
+      "Non-custodial vault contracts for pooled strategy execution",
+      "Wallet-first onboarding and risk profile selection",
+      "Deposit/withdraw user flow with strategy selection",
+    ],
+  },
+  {
+    phase: 3,
+    title: "Production analytics and controls",
+    status: "planned",
+    items: [
+      "Analytics, notifications, and policy controls",
+      "Multi-strategy routing and governance-managed parameters",
+    ],
+  },
+]);
+
 function createHttpServer({ config, statusReporter, logger }) {
   const app = express();
   app.use(express.json({ limit: "100kb" }));
@@ -42,7 +74,18 @@ function createHttpServer({ config, statusReporter, logger }) {
           "Deposit into non-custodial strategy vault",
           "Track performance and withdraw anytime",
         ],
-        note: "This repository currently provides the automation/searcher engine and dashboard scaffolding.",
+        note: "Phase 1 is complete. This repository now transitions to Phase 2 build-out.",
+      },
+    });
+  });
+
+  app.get("/api/roadmap", (_req, res) => {
+    res.json({
+      ok: true,
+      data: {
+        currentPhase: 2,
+        previousPhase: 1,
+        phases: ROADMAP_PHASES,
       },
     });
   });

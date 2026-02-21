@@ -56,9 +56,9 @@
           Build a user-friendly DeFi product where everyday users can connect a wallet, choose risk
           settings, and use non-custodial strategy vaults powered by automated searchers.
         </p>
-        <p class="warn">
-          Current status: engine + monitoring + execution backend are live. Consumer vault UI flow is
-          in progress.
+        <p class="ok">
+          Phase 1 complete: engine + safeguards + dashboard/API are live. Phase 2 vault UX build-out
+          is now in progress.
         </p>
       </div>
 
@@ -75,6 +75,11 @@
       <div class="card">
         <h2>Risk Profiles</h2>
         <pre id="profiles">Loading...</pre>
+      </div>
+
+      <div class="card">
+        <h2>Roadmap</h2>
+        <pre id="roadmap">Loading...</pre>
       </div>
 
       <div class="card">
@@ -107,6 +112,9 @@
 
           const profiles = await loadJson("/api/risk-profiles");
           document.getElementById("profiles").textContent = JSON.stringify(profiles, null, 2);
+
+          const roadmap = await loadJson("/api/roadmap");
+          document.getElementById("roadmap").textContent = JSON.stringify(roadmap, null, 2);
         } catch (error) {
           document.getElementById("health").textContent = `Error: ${error.message}`;
         }
