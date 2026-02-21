@@ -23,7 +23,7 @@ function parseEth(value, fieldName, { allowZero = false } = {}) {
   let parsed;
   try {
     parsed = parseEther(String(value));
-  } catch (error) {
+  } catch {
     throw new Error(`${fieldName} must be a valid ETH amount`);
   }
 
@@ -132,7 +132,7 @@ class ConsumerVaultService {
     ) {
       try {
         reportedProfitWei = BigInt(String(status.realizedProfitEthWei).trim());
-      } catch (_error) {
+      } catch {
         reportedProfitWei = null;
       }
     } else if (
@@ -142,7 +142,7 @@ class ConsumerVaultService {
     ) {
       try {
         reportedProfitWei = parseEther(String(status.realizedProfitEth).trim());
-      } catch (_error) {
+      } catch {
         reportedProfitWei = null;
       }
     }
