@@ -208,12 +208,12 @@ Placeholders like `{{tokenIn}}`, `{{flashLoanAmountWei}}`, `{{borrower}}` are su
 
 ## Product Roadmap (Consumer dApp)
 
-### Phase 1 (current)
+### Phase 1 (completed)
 - Searcher engine with safeguards (Flashbots, kill-switch, retries, status reporting)
 - Configurable monitoring/execution stack
 - Basic dashboard/API for visibility
 
-### Phase 2
+### Phase 2 (next)
 - Non-custodial vault contracts for pooled strategy execution
 - Wallet-first UI with risk profile onboarding
 - Deposit/withdraw UX and strategy selection

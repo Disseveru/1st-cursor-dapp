@@ -42,7 +42,33 @@ function createHttpServer({ config, statusReporter, logger }) {
           "Deposit into non-custodial strategy vault",
           "Track performance and withdraw anytime",
         ],
-        note: "This repository currently provides the automation/searcher engine and dashboard scaffolding.",
+        roadmap: {
+          phase1: {
+            status: "completed",
+            deliverables: [
+              "Searcher engine with safeguards (Flashbots, kill-switch, retries, status reporting)",
+              "Configurable monitoring/execution stack",
+              "Basic dashboard/API for visibility",
+            ],
+          },
+          phase2: {
+            status: "next",
+            deliverables: [
+              "Non-custodial vault contracts for pooled strategy execution",
+              "Wallet-first UI with risk profile onboarding",
+              "Deposit/withdraw UX and strategy selection",
+            ],
+          },
+          phase3: {
+            status: "planned",
+            deliverables: [
+              "Production analytics, user notifications, and policy controls",
+              "Multi-strategy routing and governance-managed parameters",
+            ],
+          },
+        },
+        phase2Ready: true,
+        note: "Phase 1 execution infrastructure is complete; Phase 2 vault and wallet UX work can begin.",
       },
     });
   });

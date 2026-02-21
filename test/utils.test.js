@@ -2,9 +2,24 @@ const { sleep, parseJSON, asBool, normalizePrivateKey, addressEq } = require("..
 
 describe("sleep", () => {
   it("resolves after the specified duration", async () => {
-    const start = Date.now();
-    await sleep(50);
-    expect(Date.now() - start).toBeGreaterThanOrEqual(40);
+    jest.useFakeTimers();
+    try {
+      const onResolved = jest.fn();
+      const promise = sleep(50).then(onResolved);
+
+      await Promise.resolve();
+      expect(onResolved).not.toHaveBeenCalled();
+
+      jest.advanceTimersByTime(49);
+      await Promise.resolve();
+      expect(onResolved).not.toHaveBeenCalled();
+
+      jest.advanceTimersByTime(1);
+      await promise;
+      expect(onResolved).toHaveBeenCalledTimes(1);
+    } finally {
+      jest.useRealTimers();
+    }
   });
 });
 

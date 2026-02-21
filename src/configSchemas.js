@@ -99,7 +99,21 @@ const executionTemplatesSchema = z.object({
   crossChainInnerSteps: z.array(spellStepSchema).default([]),
 });
 
+function getValueType(value) {
+  if (Array.isArray(value)) return "array";
+  if (value === null) return "null";
+  return typeof value;
+}
+
 function validateArbitragePairs(pairs, logger) {
+  if (!Array.isArray(pairs)) {
+    logger?.warn?.(
+      { valueType: getValueType(pairs) },
+      "Invalid arbitrage pairs config, expected array, using empty list",
+    );
+    return [];
+  }
+
   const results = [];
   for (const [i, pair] of pairs.entries()) {
     const parsed = arbitragePairSchema.safeParse(pair);
@@ -107,7 +121,7 @@ function validateArbitragePairs(pairs, logger) {
       results.push(parsed.data);
     } else {
       logger.warn(
-        { index: i, label: pair.label, errors: parsed.error.format() },
+        { index: i, label: pair?.label, errors: parsed.error.format() },
         "Invalid arbitrage pair config, skipping",
       );
     }
@@ -116,6 +130,14 @@ function validateArbitragePairs(pairs, logger) {
 }
 
 function validateLiquidationPositions(positions, logger) {
+  if (!Array.isArray(positions)) {
+    logger?.warn?.(
+      { valueType: getValueType(positions) },
+      "Invalid liquidation positions config, expected array, using empty list",
+    );
+    return [];
+  }
+
   const results = [];
   for (const [i, pos] of positions.entries()) {
     const parsed = liquidationPositionSchema.safeParse(pos);
@@ -123,7 +145,7 @@ function validateLiquidationPositions(positions, logger) {
       results.push(parsed.data);
     } else {
       logger.warn(
-        { index: i, label: pos.label, errors: parsed.error.format() },
+        { index: i, label: pos?.label, errors: parsed.error.format() },
         "Invalid liquidation position config, skipping",
       );
     }
@@ -132,6 +154,14 @@ function validateLiquidationPositions(positions, logger) {
 }
 
 function validateCrossChainPairs(pairs, logger) {
+  if (!Array.isArray(pairs)) {
+    logger?.warn?.(
+      { valueType: getValueType(pairs) },
+      "Invalid cross-chain pairs config, expected array, using empty list",
+    );
+    return [];
+  }
+
   const results = [];
   for (const [i, pair] of pairs.entries()) {
     const parsed = crossChainPairSchema.safeParse(pair);
@@ -139,7 +169,7 @@ function validateCrossChainPairs(pairs, logger) {
       results.push(parsed.data);
     } else {
       logger.warn(
-        { index: i, label: pair.label, errors: parsed.error.format() },
+        { index: i, label: pair?.label, errors: parsed.error.format() },
         "Invalid cross-chain pair config, skipping",
       );
     }
@@ -148,20 +178,37 @@ function validateCrossChainPairs(pairs, logger) {
 }
 
 function validateExecutionTemplates(templates, logger) {
-  const parsed = executionTemplatesSchema.safeParse(templates);
-  if (parsed.success) {
-    return parsed.data;
+  if (!templates || typeof templates !== "object" || Array.isArray(templates)) {
+    logger?.warn?.(
+      { valueType: getValueType(templates) },
+      "Invalid execution templates config, expected object, using defaults",
+    );
+    return {};
   }
-  logger.warn(
-    { errors: parsed.error.format() },
-    "Invalid execution templates config, using defaults",
-  );
-  return {
-    arbitrageInnerSteps: [],
-    liquidationInnerSteps: [],
-    liquidationInnerStepsByProtocol: {},
-    crossChainInnerSteps: [],
+
+  const fieldValidators = {
+    arbitrageInnerSteps: z.array(spellStepSchema),
+    liquidationInnerSteps: z.array(spellStepSchema),
+    liquidationInnerStepsByProtocol: z.record(z.string(), z.array(spellStepSchema)),
+    crossChainInnerSteps: z.array(spellStepSchema),
   };
+
+  const validated = {};
+  for (const [field, validator] of Object.entries(fieldValidators)) {
+    if (!(field in templates)) continue;
+    const parsed = validator.safeParse(templates[field]);
+    if (parsed.success) {
+      validated[field] = parsed.data;
+      continue;
+    }
+
+    logger?.warn?.(
+      { field, errors: parsed.error.format() },
+      "Invalid execution templates field, using default field value",
+    );
+  }
+
+  return validated;
 }
 
 module.exports = {

@@ -140,8 +140,17 @@ async function bootstrap() {
     }
     process.exit(0);
   }
-  process.on("SIGINT", () => gracefulShutdown("SIGINT"));
-  process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
+  const onSignal = (signal) => {
+    void gracefulShutdown(signal).catch((error) => {
+      logger.error(
+        { signal, error: error?.message || String(error), stack: error?.stack },
+        "Error during graceful shutdown",
+      );
+      process.exit(1);
+    });
+  };
+  process.on("SIGINT", () => onSignal("SIGINT"));
+  process.on("SIGTERM", () => onSignal("SIGTERM"));
 
   await bot.start();
 }

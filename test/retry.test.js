@@ -53,6 +53,15 @@ describe("withRetry", () => {
     expect(fn).toHaveBeenCalledTimes(1);
   });
 
+  it("coerces maxAttempts < 1 to a single attempt", async () => {
+    const fn = jest.fn(async () => {
+      throw new Error("always fails");
+    });
+
+    await expect(withRetry(fn, { maxAttempts: 0, baseDelayMs: 1 })).rejects.toThrow("always fails");
+    expect(fn).toHaveBeenCalledTimes(1);
+  });
+
   it("calls logger.debug on retry", async () => {
     let attempt = 0;
     const logger = { debug: jest.fn() };

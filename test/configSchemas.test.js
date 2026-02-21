@@ -19,6 +19,10 @@ const nullLogger = {
   error: jest.fn(),
 };
 
+beforeEach(() => {
+  jest.clearAllMocks();
+});
+
 describe("arbitragePairSchema", () => {
   const validPair = {
     label: "DAI/USDC",
@@ -140,6 +144,14 @@ describe("validateArbitragePairs", () => {
     expect(result[0].label).toBe("valid");
     expect(nullLogger.warn).toHaveBeenCalled();
   });
+
+  it("returns empty array for non-array input", () => {
+    expect(validateArbitragePairs({}, nullLogger)).toEqual([]);
+    expect(nullLogger.warn).toHaveBeenCalledWith(
+      expect.objectContaining({ valueType: "object" }),
+      "Invalid arbitrage pairs config, expected array, using empty list",
+    );
+  });
 });
 
 describe("validateLiquidationPositions", () => {
@@ -156,18 +168,49 @@ describe("validateLiquidationPositions", () => {
     const result = validateLiquidationPositions(positions, nullLogger);
     expect(result).toHaveLength(1);
   });
+
+  it("returns empty array for non-array input", () => {
+    expect(validateLiquidationPositions("bad", nullLogger)).toEqual([]);
+    expect(nullLogger.warn).toHaveBeenCalledWith(
+      expect.objectContaining({ valueType: "string" }),
+      "Invalid liquidation positions config, expected array, using empty list",
+    );
+  });
 });
 
 describe("validateCrossChainPairs", () => {
   it("returns empty array for empty input", () => {
     expect(validateCrossChainPairs([], nullLogger)).toEqual([]);
   });
+
+  it("returns empty array for non-array input", () => {
+    expect(validateCrossChainPairs(null, nullLogger)).toEqual([]);
+    expect(nullLogger.warn).toHaveBeenCalledWith(
+      expect.objectContaining({ valueType: "null" }),
+      "Invalid cross-chain pairs config, expected array, using empty list",
+    );
+  });
 });
 
 describe("validateExecutionTemplates", () => {
-  it("returns defaults for invalid input", () => {
+  it("returns empty override object for invalid input", () => {
     const result = validateExecutionTemplates("not-an-object", nullLogger);
-    expect(result.arbitrageInnerSteps).toEqual([]);
-    expect(result.liquidationInnerStepsByProtocol).toEqual({});
+    expect(result).toEqual({});
+  });
+
+  it("keeps valid fields and drops invalid override fields", () => {
+    const result = validateExecutionTemplates(
+      {
+        arbitrageInnerSteps: [{ connector: "oneInch", method: "sell", args: ["a", "b"] }],
+        liquidationInnerSteps: "bad-shape",
+      },
+      nullLogger,
+    );
+    expect(result.arbitrageInnerSteps).toHaveLength(1);
+    expect(result.liquidationInnerSteps).toBeUndefined();
+    expect(nullLogger.warn).toHaveBeenCalledWith(
+      expect.objectContaining({ field: "liquidationInnerSteps" }),
+      "Invalid execution templates field, using default field value",
+    );
   });
 });

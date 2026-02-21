@@ -13,20 +13,30 @@ async function withRetry(
     logger = null,
   } = {},
 ) {
+  const parsedMaxAttempts = Number(maxAttempts);
+  const normalizedMaxAttempts = Number.isFinite(parsedMaxAttempts)
+    ? Math.max(1, Math.trunc(parsedMaxAttempts))
+    : 1;
   let lastError;
-  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+  for (let attempt = 1; attempt <= normalizedMaxAttempts; attempt++) {
     try {
       return await fn();
     } catch (error) {
       lastError = error;
-      if (attempt === maxAttempts || !shouldRetry(error)) {
+      if (attempt === normalizedMaxAttempts || !shouldRetry(error)) {
         throw error;
       }
       const jitter = Math.random() * 0.3 + 0.85;
       const delay = Math.min(baseDelayMs * 2 ** (attempt - 1) * jitter, maxDelayMs);
       if (logger) {
         logger.debug(
-          { label, attempt, maxAttempts, delayMs: Math.round(delay), error: error.message },
+          {
+            label,
+            attempt,
+            maxAttempts: normalizedMaxAttempts,
+            delayMs: Math.round(delay),
+            error: error.message,
+          },
           "Retrying after transient failure",
         );
       }
