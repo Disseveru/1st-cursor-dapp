@@ -53,10 +53,6 @@ describe("httpServer", () => {
       const profiles = await fetch(`${baseUrl}/api/risk-profiles`).then((r) => r.json());
       expect(profiles.ok).toBe(true);
       expect(profiles.data.length).toBeGreaterThan(0);
-
-      const vision = await fetch(`${baseUrl}/api/vision`).then((r) => r.json());
-      expect(vision.ok).toBe(true);
-      expect(vision.data.userFlow).toContain("Accept invitation");
     } finally {
       await serverHandle.close();
     }

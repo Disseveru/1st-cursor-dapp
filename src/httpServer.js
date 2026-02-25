@@ -44,7 +44,6 @@ function createHttpServer({ config, statusReporter, logger, invitationService })
       data: {
         userFlow: [
           "Connect wallet",
-          "Accept invitation",
           "Choose risk profile",
           "Deposit into non-custodial strategy vault",
           "Track performance and withdraw anytime",
