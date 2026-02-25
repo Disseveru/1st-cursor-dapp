@@ -30,6 +30,7 @@ Implemented capabilities:
 - **Execution engine**
   - Builds `dsa.cast` transaction payloads (via `dsa.castTxObj`) with flashloan + swap/liquidation + payback spell flow.
   - Executes privately with Flashbots (`@flashbots/ethers-provider-bundle`).
+  - Optional Avocado relay execution mode for smart-wallet-based operation.
 - **Security & automation**
   - Kill-switch stops operation if gas wallet ETH falls below threshold.
   - Configurable public mempool fallback (disabled by default).
@@ -76,6 +77,9 @@ cp .env.example .env
      - `PRIVATE_KEY_ENCRYPTED` + `ENV_ENCRYPTION_KEY`, or
      - `PRIVATE_KEY_SECRET_ID` + `AWS_REGION`
    - `USE_FLASHBOTS=true`
+   - If using Avocado execution mode:
+     - `AVOCADO_EXECUTION_ENABLED=true`
+     - `AVOCADO_SAFE_ADDRESS=<your_safe_address>` (optional but recommended)
    - strategy JSONs (`ARBITRAGE_PAIRS_JSON`, `LIQUIDATION_POSITIONS_JSON`, etc.)
 
 4. Validate module loading:
@@ -114,6 +118,9 @@ Then open: `http://localhost:3000`
   execute one monitor/execution cycle.
 - `npm run dry-run`  
   single cycle with execution disabled.
+
+If `AVOCADO_EXECUTION_ENABLED=true`, execution is routed through Avocado relay mode and
+the direct Flashbots send path is bypassed.
 
 ---
 
@@ -200,6 +207,8 @@ Placeholders like `{{tokenIn}}`, `{{flashLoanAmountWei}}`, `{{borrower}}` are su
   profitability gate, kill-switch, private/public execution.
 - `src/flashbotsExecutor.js`  
   Flashbots private transaction relay.
+- `src/avocadoExecutor.js`  
+  Avocado relay transaction execution.
 - `src/httpServer.js`  
   Optional user-facing dashboard/API server.
 - `src/riskProfiles.js`  

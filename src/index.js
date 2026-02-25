@@ -10,6 +10,7 @@ const { SpellBuilder } = require("./spellBuilder");
 const { FlashbotsExecutor } = require("./flashbotsExecutor");
 const { ExecutionEngine } = require("./executionEngine");
 const { AvocadoBalanceFetcher } = require("./avocadoBalanceFetcher");
+const { AvocadoExecutor } = require("./avocadoExecutor");
 const { StatusReporter } = require("./statusReporter");
 const { SearcherBot } = require("./bot");
 const { createHttpServer } = require("./httpServer");
@@ -44,6 +45,7 @@ async function bootstrap() {
   const quoter = new PriceQuoter({ providers, logger });
 
   let avocadoBalanceFetcher = null;
+  let avocadoExecutor = null;
   if (config.avocado.enabled) {
     avocadoBalanceFetcher = new AvocadoBalanceFetcher({
       privateKey: config.dsa.privateKey,
@@ -55,6 +57,23 @@ async function bootstrap() {
       logger,
     });
     await avocadoBalanceFetcher.init();
+  }
+
+  if (config.avocado.executionEnabled) {
+    avocadoExecutor = new AvocadoExecutor({
+      privateKey: config.dsa.privateKey,
+      avocadoRpcUrl: config.avocado.rpcUrl,
+      chainRpcUrls: config.providers.chainRpcUrls,
+      safeAddress: config.avocado.safeAddress,
+      targetChainId: config.avocado.executionChainId,
+      logger,
+    });
+    await avocadoExecutor.init();
+    if (config.flashbots.enabled) {
+      logger.warn(
+        "AVOCADO_EXECUTION_ENABLED=true: direct Flashbots relay path will be bypassed for execution.",
+      );
+    }
   }
 
   const arbitrageMonitor = new ArbitrageMonitor({
@@ -95,6 +114,7 @@ async function bootstrap() {
     provider: mainProvider,
     spellBuilder,
     flashbotsExecutor,
+    avocadoExecutor,
     logger,
   });
 

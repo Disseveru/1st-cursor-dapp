@@ -2,15 +2,33 @@ const { formatEther, parseEther } = require("ethers");
 const { withRetry, isTransientRpcError } = require("./utils");
 
 class ExecutionEngine {
-  constructor({ config, dsa, signerAddress, provider, spellBuilder, flashbotsExecutor, logger }) {
+  constructor({
+    config,
+    dsa,
+    signerAddress,
+    provider,
+    spellBuilder,
+    flashbotsExecutor,
+    avocadoExecutor = null,
+    logger,
+  }) {
     this.config = config;
     this.dsa = dsa;
     this.signerAddress = signerAddress;
     this.provider = provider;
     this.spellBuilder = spellBuilder;
     this.flashbotsExecutor = flashbotsExecutor;
+    this.avocadoExecutor = avocadoExecutor;
     this.logger = logger;
     this.halted = false;
+    this.executionAddress = this.resolveExecutionAddress();
+  }
+
+  resolveExecutionAddress() {
+    if (this.config.avocado?.executionEnabled) {
+      return this.avocadoExecutor?.getExecutionAddress?.() || this.signerAddress;
+    }
+    return this.signerAddress;
   }
 
   rpcRetryOpts(label) {
@@ -24,9 +42,10 @@ class ExecutionEngine {
   }
 
   async checkKillSwitch() {
+    this.executionAddress = this.resolveExecutionAddress();
     const thresholdWei = parseEther(String(this.config.risk.gasKillSwitchEth));
     const balanceWei = await withRetry(
-      () => this.provider.getBalance(this.signerAddress),
+      () => this.provider.getBalance(this.executionAddress),
       this.rpcRetryOpts("kill-switch-balance"),
     );
 
@@ -34,7 +53,7 @@ class ExecutionEngine {
       this.halted = true;
       this.logger.error(
         {
-          signer: this.signerAddress,
+          signer: this.executionAddress,
           balanceEth: formatEther(balanceWei),
           thresholdEth: this.config.risk.gasKillSwitchEth,
         },
@@ -141,6 +160,38 @@ class ExecutionEngine {
         "Dry run enabled: transaction not broadcast",
       );
       return { skipped: true, reason: "dry-run" };
+    }
+
+    if (this.config.avocado?.executionEnabled && this.avocadoExecutor) {
+      try {
+        const avocado = await this.avocadoExecutor.sendTransaction({
+          to: txRequest.to,
+          data: txRequest.data,
+          value: txRequest.value,
+          chainId: this.config.avocado.executionChainId || txRequest.chainId,
+        });
+        this.logger.info(
+          {
+            label: opportunity.label,
+            txHash: avocado.txHash,
+            safeAddress: this.avocadoExecutor.getExecutionAddress(),
+            chainId: this.config.avocado.executionChainId || txRequest.chainId,
+          },
+          "Opportunity executed via Avocado relay",
+        );
+        return {
+          executed: true,
+          txHash: avocado.txHash,
+          privateRelay: false,
+          avocadoRelay: true,
+        };
+      } catch (error) {
+        this.logger.warn(
+          { label: opportunity.label, error: error.message },
+          "Avocado relay send failed",
+        );
+        return { skipped: true, reason: "avocado-send-failed" };
+      }
     }
 
     if (this.config.flashbots.enabled) {

@@ -109,6 +109,7 @@ async function loadConfig({ logger, cliFlags }) {
     FLASHBOTS_RELAY_URL: z.string().url().default("https://relay.flashbots.net"),
     FLASHBOTS_MAX_BLOCKS: z.coerce.number().int().positive().default(6),
     GAS_MULTIPLIER: z.coerce.number().positive().default(1.15),
+    AVOCADO_EXECUTION_CHAIN_ID: z.coerce.number().int().positive().default(1),
   });
 
   const parsed = schema.parse({
@@ -123,6 +124,7 @@ async function loadConfig({ logger, cliFlags }) {
     FLASHBOTS_RELAY_URL: env.FLASHBOTS_RELAY_URL || "https://relay.flashbots.net",
     FLASHBOTS_MAX_BLOCKS: env.FLASHBOTS_MAX_BLOCKS || 6,
     GAS_MULTIPLIER: env.GAS_MULTIPLIER || 1.15,
+    AVOCADO_EXECUTION_CHAIN_ID: env.AVOCADO_EXECUTION_CHAIN_ID || 1,
   });
 
   const rawArbitragePairs = parseJSON(
@@ -252,6 +254,9 @@ async function loadConfig({ logger, cliFlags }) {
     avocado: {
       enabled: asBool(env.AVOCADO_ENABLED, true),
       rpcUrl: env.AVOCADO_RPC_URL || "https://rpc.avocado.instadapp.io",
+      executionEnabled: asBool(env.AVOCADO_EXECUTION_ENABLED, false),
+      safeAddress: env.AVOCADO_SAFE_ADDRESS || "",
+      executionChainId: parsed.AVOCADO_EXECUTION_CHAIN_ID,
       chainIds: parseJSON(
         env.AVOCADO_BALANCE_CHAINS_JSON,
         [1, 8453, 42161],
