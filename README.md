@@ -15,6 +15,12 @@ It is a simple consumer dApp where users can:
 
 This repository is the execution/searcher engine that powers that experience.
 
+## Community
+
+Join the DefiEveryone Slack workspace:
+
+- [Slack Invite Link](https://join.slack.com/t/defieveryone/shared_invite/zt-3qr93ipqf-7S75Qox5xVNsv9zLZqAUeQ)
+
 Implemented capabilities:
 
 - **Connection & key management**
