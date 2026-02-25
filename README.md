@@ -125,6 +125,8 @@ If enabled (`WEB_DASHBOARD_ENABLED=true`), the bot also exposes:
 - `GET /api/status` - runtime status metrics
 - `GET /api/risk-profiles` - beginner-friendly strategy profile presets
 - `GET /api/vision` - product flow and roadmap context
+- `POST /api/invitations/accept` - accept an invitation using code payload
+- `GET /api/invitations/:invitationCode` - check invitation acceptance status
 
 And serves a lightweight dashboard at `/`.
 
