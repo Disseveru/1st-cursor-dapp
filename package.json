@@ -10,6 +10,8 @@
     "dry-run": "node src/index.js --dry-run --once",
     "check": "node -e \"require('./src/index.js')\"",
     "encrypt:key": "node scripts/encrypt-env.js",
+    "avocado:status": "node scripts/avocado-dsa-bootstrap.js status",
+    "avocado:build-dsa": "node scripts/avocado-dsa-bootstrap.js build",
     "test": "jest --verbose",
     "test:ci": "jest --ci --coverage",
     "lint": "eslint src/ test/ scripts/",

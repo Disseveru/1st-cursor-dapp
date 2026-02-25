@@ -108,6 +108,29 @@ WEB_DASHBOARD_ENABLED=true WEB_PORT=3000 npm run start
 
 Then open: `http://localhost:3000`
 
+### Avocado owner -> safe -> DSA bootstrap
+
+If you use Avocado execution mode, remember:
+
+- The Avocado wallet is a smart account (no direct private key).
+- You use the **owner EOA private key** to sign on behalf of the safe.
+
+Helpers:
+
+```bash
+# Check owner/safe alignment, current balance, and DSA build funding shortfall
+npm run avocado:status
+
+# Build a new DSA for the configured AVOCADO_SAFE_ADDRESS authority (when funded)
+npm run avocado:build-dsa
+```
+
+After `avocado:build-dsa`, set `.env`:
+
+```env
+DSA_ID=<suggestedDsaId from command output>
+```
+
 ---
 
 ## Runtime Modes
