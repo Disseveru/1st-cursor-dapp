@@ -76,10 +76,11 @@ class ExecutionEngine {
   }
 
   async buildCastTransaction(spells) {
+    const fromAddress = this.resolveExecutionAddress();
     const gasPriceWei = await this.getGasPriceWei();
     const txObj = await this.dsa.castTxObj({
       spells,
-      from: this.signerAddress,
+      from: fromAddress,
       gasPrice: gasPriceWei.toString(),
     });
     const estimatedGasWei = BigInt(txObj.gas) * BigInt(txObj.gasPrice);
