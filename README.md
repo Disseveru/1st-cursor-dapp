@@ -26,7 +26,7 @@ Implemented capabilities:
 - **Monitoring brain (ethers.js + high-speed RPC)**
   - Arbitrage polling across **Uniswap V3**, **SushiSwap**, **Curve**.
   - Liquidation watchers for **Aave V3** health factor and **Compound** liquidatability.
-  - Cross-chain spread monitor (Mainnet/Base/Arbitrum) with **Avocado cross-chain balance fetching** context.
+  - Cross-chain spread monitor (Mainnet/Base/Arbitrum) with **raw EOA cross-chain balance fetching** context.
 - **Execution engine**
   - Builds `dsa.cast` transaction payloads (via `dsa.castTxObj`) with flashloan + swap/liquidation + payback spell flow.
   - Executes privately with Flashbots (`@flashbots/ethers-provider-bundle`).
@@ -150,7 +150,7 @@ And serves a lightweight dashboard at `/`.
 
 ### 3) Cross-chain spreads
 
-`CROSS_CHAIN_PAIRS_JSON` compares same pair across chain IDs and attaches Avocado balances.
+`CROSS_CHAIN_PAIRS_JSON` compares same pair across chain IDs and attaches raw EOA balances.
 
 ### 4) Spell templates
 
@@ -184,7 +184,7 @@ Placeholders like `{{tokenIn}}`, `{{flashLoanAmountWei}}`, `{{borrower}}` are su
 - `src/liquidationMonitor.js`  
   Aave/Compound liquidation watcher.
 - `src/crossChainMonitor.js`  
-  L1/L2 spread checks + Avocado balance context.
+  L1/L2 spread checks + raw EOA balance context.
 - `src/spellBuilder.js`  
   Instadapp flashloan cast spell construction.
 - `src/executionEngine.js`  

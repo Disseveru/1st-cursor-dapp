@@ -84,7 +84,6 @@ function normalizeRpcMap(env) {
   if (env.ETHEREUM_RPC_URL) map[1] = env.ETHEREUM_RPC_URL;
   if (env.BASE_RPC_URL) map[8453] = env.BASE_RPC_URL;
   if (env.ARBITRUM_RPC_URL) map[42161] = env.ARBITRUM_RPC_URL;
-  if (env.AVOCADO_RPC_URL) map[634] = env.AVOCADO_RPC_URL;
 
   return Object.fromEntries(Object.entries(map).filter(([, value]) => Boolean(value)));
 }
@@ -198,6 +197,11 @@ async function loadConfig({ logger, cliFlags }) {
     chainRpcUrls[1] = parsed.ETHEREUM_RPC_URL;
   }
 
+  const eoaBalanceEnabled = env.EOA_BALANCE_ENABLED ?? env.AVOCADO_ENABLED;
+  const eoaBalanceChainsJson = env.EOA_BALANCE_CHAINS_JSON ?? env.AVOCADO_BALANCE_CHAINS_JSON;
+  const eoaTrackTokens = env.EOA_TRACK_TOKENS ?? env.AVOCADO_TRACK_TOKENS;
+  const eoaTokensByChainJson = env.EOA_TOKENS_BY_CHAIN_JSON ?? env.AVOCADO_TOKENS_BY_CHAIN_JSON;
+
   return {
     app: {
       logLevel: parsed.LOG_LEVEL,
@@ -249,19 +253,18 @@ async function loadConfig({ logger, cliFlags }) {
     tokens: {
       weth: env.WETH_ADDRESS || DEFAULT_ADDRESSES.WETH_MAINNET,
     },
-    avocado: {
-      enabled: asBool(env.AVOCADO_ENABLED, true),
-      rpcUrl: env.AVOCADO_RPC_URL || "https://rpc.avocado.instadapp.io",
+    eoaBalances: {
+      enabled: asBool(eoaBalanceEnabled, true),
       chainIds: parseJSON(
-        env.AVOCADO_BALANCE_CHAINS_JSON,
+        eoaBalanceChainsJson,
         [1, 8453, 42161],
-        "AVOCADO_BALANCE_CHAINS_JSON",
+        "EOA_BALANCE_CHAINS_JSON",
       ),
-      trackTokenBalances: asBool(env.AVOCADO_TRACK_TOKENS, false),
+      trackTokenBalances: asBool(eoaTrackTokens, false),
       trackedTokensByChain: parseJSON(
-        env.AVOCADO_TOKENS_BY_CHAIN_JSON,
+        eoaTokensByChainJson,
         {},
-        "AVOCADO_TOKENS_BY_CHAIN_JSON",
+        "EOA_TOKENS_BY_CHAIN_JSON",
       ),
     },
     addresses: DEFAULT_ADDRESSES,

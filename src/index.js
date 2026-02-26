@@ -9,7 +9,7 @@ const { CrossChainMonitor } = require("./crossChainMonitor");
 const { SpellBuilder } = require("./spellBuilder");
 const { FlashbotsExecutor } = require("./flashbotsExecutor");
 const { ExecutionEngine } = require("./executionEngine");
-const { AvocadoBalanceFetcher } = require("./avocadoBalanceFetcher");
+const { RawEoaBalanceFetcher } = require("./rawEoaBalanceFetcher");
 const { StatusReporter } = require("./statusReporter");
 const { SearcherBot } = require("./bot");
 const { createHttpServer } = require("./httpServer");
@@ -43,18 +43,17 @@ async function bootstrap() {
 
   const quoter = new PriceQuoter({ providers, logger });
 
-  let avocadoBalanceFetcher = null;
-  if (config.avocado.enabled) {
-    avocadoBalanceFetcher = new AvocadoBalanceFetcher({
+  let eoaBalanceFetcher = null;
+  if (config.eoaBalances.enabled) {
+    eoaBalanceFetcher = new RawEoaBalanceFetcher({
       privateKey: config.dsa.privateKey,
-      avocadoRpcUrl: config.avocado.rpcUrl,
       chainRpcUrls: config.providers.chainRpcUrls,
-      chainIds: config.avocado.chainIds,
-      trackedTokensByChain: config.avocado.trackedTokensByChain,
-      trackTokenBalances: config.avocado.trackTokenBalances,
+      chainIds: config.eoaBalances.chainIds,
+      trackedTokensByChain: config.eoaBalances.trackedTokensByChain,
+      trackTokenBalances: config.eoaBalances.trackTokenBalances,
       logger,
     });
-    await avocadoBalanceFetcher.init();
+    await eoaBalanceFetcher.init();
   }
 
   const arbitrageMonitor = new ArbitrageMonitor({
@@ -70,7 +69,7 @@ async function bootstrap() {
   const crossChainMonitor = new CrossChainMonitor({
     config,
     quoter,
-    avocadoBalanceFetcher,
+    eoaBalanceFetcher,
     logger,
   });
 

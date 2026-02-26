@@ -2,10 +2,10 @@ const { parseUnits } = require("ethers");
 const { addressEq } = require("./utils");
 
 class CrossChainMonitor {
-  constructor({ config, quoter, avocadoBalanceFetcher, logger }) {
+  constructor({ config, quoter, eoaBalanceFetcher, logger }) {
     this.config = config;
     this.quoter = quoter;
-    this.avocadoBalanceFetcher = avocadoBalanceFetcher;
+    this.eoaBalanceFetcher = eoaBalanceFetcher;
     this.logger = logger;
   }
 
@@ -141,8 +141,8 @@ class CrossChainMonitor {
     const pairs = this.config.monitoring.crossChainPairs || [];
     if (!pairs.length) return [];
 
-    const balances = this.avocadoBalanceFetcher
-      ? await this.avocadoBalanceFetcher.fetchBalances()
+    const balances = this.eoaBalanceFetcher
+      ? await this.eoaBalanceFetcher.fetchBalances()
       : null;
 
     const opportunities = [];

@@ -43,7 +43,6 @@
   "dependencies": {
     "@aws-sdk/client-secrets-manager": "^3.994.0",
     "@flashbots/ethers-provider-bundle": "^1.0.0",
-    "@instadapp/avocado": "^0.4.5",
     "axios": "^1.13.5",
     "dotenv": "^17.3.1",
     "dsa-sdk": "^1.5.15",
