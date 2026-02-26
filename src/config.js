@@ -109,6 +109,8 @@ async function loadConfig({ logger, cliFlags }) {
     FLASHBOTS_RELAY_URL: z.string().url().default("https://relay.flashbots.net"),
     FLASHBOTS_MAX_BLOCKS: z.coerce.number().int().positive().default(6),
     GAS_MULTIPLIER: z.coerce.number().positive().default(1.15),
+    GAS_PRICE_MULTIPLIER: z.coerce.number().positive().default(1.0),
+    PRIORITY_TIP_GWEI: z.coerce.number().nonnegative().default(0),
     AVOCADO_EXECUTION_CHAIN_ID: z.coerce.number().int().positive().default(1),
   });
 
@@ -124,6 +126,8 @@ async function loadConfig({ logger, cliFlags }) {
     FLASHBOTS_RELAY_URL: env.FLASHBOTS_RELAY_URL || "https://relay.flashbots.net",
     FLASHBOTS_MAX_BLOCKS: env.FLASHBOTS_MAX_BLOCKS || 6,
     GAS_MULTIPLIER: env.GAS_MULTIPLIER || 1.15,
+    GAS_PRICE_MULTIPLIER: env.GAS_PRICE_MULTIPLIER || 1.0,
+    PRIORITY_TIP_GWEI: env.PRIORITY_TIP_GWEI || 0,
     AVOCADO_EXECUTION_CHAIN_ID: env.AVOCADO_EXECUTION_CHAIN_ID || 1,
   });
 
@@ -243,6 +247,8 @@ async function loadConfig({ logger, cliFlags }) {
     },
     execution: {
       flashloanRoute: parsed.FLASHLOAN_ROUTE,
+      gasPriceMultiplier: parsed.GAS_PRICE_MULTIPLIER,
+      priorityTipGwei: parsed.PRIORITY_TIP_GWEI,
       templates: executionTemplates,
       bridgeConnector: env.BRIDGE_CONNECTOR || "",
       bridgeMethod: env.BRIDGE_METHOD || "",
@@ -257,6 +263,11 @@ async function loadConfig({ logger, cliFlags }) {
       executionEnabled: asBool(env.AVOCADO_EXECUTION_ENABLED, false),
       safeAddress: env.AVOCADO_SAFE_ADDRESS || "",
       executionChainId: parsed.AVOCADO_EXECUTION_CHAIN_ID,
+      txValidUntil: env.AVOCADO_TX_VALID_UNTIL || "0",
+      txGas: env.AVOCADO_TX_GAS || "0",
+      txSource: env.AVOCADO_TX_SOURCE || "0x000000000000000000000000000000000000Cad0",
+      txId: env.AVOCADO_TX_ID || "0",
+      txVersion: env.AVOCADO_TX_VERSION || "",
       chainIds: parseJSON(
         env.AVOCADO_BALANCE_CHAINS_JSON,
         [1, 8453, 42161],

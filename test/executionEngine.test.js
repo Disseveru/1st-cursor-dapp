@@ -22,6 +22,10 @@ function makeEngine(overrides = {}) {
       enabled: true,
       allowPublicFallback: true,
     },
+    execution: {
+      gasPriceMultiplier: 1,
+      priorityTipGwei: 0,
+    },
     avocado: {
       executionEnabled: true,
       executionChainId: 1,
@@ -128,5 +132,25 @@ describe("ExecutionEngine avocado mode", () => {
       "0xB1f1A61D71dFEa183deD1B62f2F3d6eB2CfdC8A5",
     );
     expect(avocadoExecutor.getExecutionAddress).toHaveBeenCalled();
+  });
+
+  test("uses EIP-1559 tip config for direct flashbots transaction request", async () => {
+    const { engine, config, flashbotsExecutor } = makeEngine();
+    config.avocado.executionEnabled = false;
+    config.execution.gasPriceMultiplier = 2;
+    config.execution.priorityTipGwei = 3;
+
+    await engine.executeOpportunity({
+      label: "arb-2",
+      type: "arbitrage",
+      expectedProfitEthWei: parseEther("0.01"),
+    });
+
+    expect(flashbotsExecutor.sendPrivate).toHaveBeenCalledTimes(1);
+    const txRequest = flashbotsExecutor.sendPrivate.mock.calls[0][0];
+    expect(txRequest.type).toBe(2);
+    expect(txRequest.maxPriorityFeePerGas).toBe(3000000000n);
+    expect(txRequest.maxFeePerGas).toBeGreaterThanOrEqual(3000000000n);
+    expect(txRequest.gasPrice).toBeUndefined();
   });
 });

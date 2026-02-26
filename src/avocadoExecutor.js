@@ -14,12 +14,29 @@ function normalizeChainRpcUrls(chainRpcUrls = {}, avocadoRpcUrl) {
 }
 
 class AvocadoExecutor {
-  constructor({ privateKey, avocadoRpcUrl, chainRpcUrls, safeAddress, targetChainId = 1, logger }) {
+  constructor({
+    privateKey,
+    avocadoRpcUrl,
+    chainRpcUrls,
+    safeAddress,
+    targetChainId = 1,
+    signatureOptions = {},
+    logger,
+  }) {
     this.privateKey = privateKey;
     this.avocadoRpcUrl = avocadoRpcUrl || "https://rpc.avocado.instadapp.io";
     this.chainRpcUrls = chainRpcUrls || {};
     this.safeAddress = safeAddress || "";
     this.targetChainId = Number(targetChainId || 1);
+    this.signatureOptions = {
+      validUntil:
+        signatureOptions.validUntil !== undefined ? String(signatureOptions.validUntil) : "0",
+      gas: signatureOptions.gas !== undefined ? String(signatureOptions.gas) : "0",
+      source:
+        signatureOptions.source || "0x000000000000000000000000000000000000Cad0",
+      id: signatureOptions.id !== undefined ? String(signatureOptions.id) : "0",
+      ...(signatureOptions.version ? { version: String(signatureOptions.version) } : {}),
+    };
     this.logger = logger;
     this.initialized = false;
     this.executionAddress = null;
@@ -67,7 +84,10 @@ class AvocadoExecutor {
 
     const targetChainId = Number(chainId || this.targetChainId || 1);
     const txValue = typeof value === "bigint" ? value.toString() : String(value || "0");
-    const safeOptions = this.safeAddress ? { safeAddress: this.safeAddress } : undefined;
+    const safeOptions = {
+      ...this.signatureOptions,
+      ...(this.safeAddress ? { safeAddress: this.safeAddress } : {}),
+    };
 
     const response = await this.safe.sendTransaction(
       {

@@ -66,6 +66,13 @@ async function bootstrap() {
       chainRpcUrls: config.providers.chainRpcUrls,
       safeAddress: config.avocado.safeAddress,
       targetChainId: config.avocado.executionChainId,
+      signatureOptions: {
+        validUntil: config.avocado.txValidUntil,
+        gas: config.avocado.txGas,
+        source: config.avocado.txSource,
+        id: config.avocado.txId,
+        version: config.avocado.txVersion || undefined,
+      },
       logger,
     });
     await avocadoExecutor.init();

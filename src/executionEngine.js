@@ -1,4 +1,4 @@
-const { formatEther, parseEther } = require("ethers");
+const { formatEther, parseEther, parseUnits } = require("ethers");
 const { withRetry, isTransientRpcError } = require("./utils");
 
 class ExecutionEngine {
@@ -70,6 +70,42 @@ class ExecutionEngine {
     return fee.gasPrice || parseEther("0.00000002"); // 20 gwei fallback
   }
 
+  applyMultiplierToWei(valueWei, multiplier) {
+    const normalized = Number.isFinite(Number(multiplier)) ? Number(multiplier) : 1;
+    const scaled = Math.round(Math.max(normalized, 0.0001) * 10_000);
+    return (valueWei * BigInt(scaled)) / 10_000n;
+  }
+
+  async getExecutionGasBid() {
+    const fee = await withRetry(() => this.provider.getFeeData(), this.rpcRetryOpts("gas-price"));
+    const multiplier = Number(this.config.execution?.gasPriceMultiplier || 1);
+
+    const baseGasPriceWei = fee.gasPrice || fee.maxFeePerGas || parseEther("0.00000002");
+    const gasPriceWei = this.applyMultiplierToWei(baseGasPriceWei, multiplier);
+
+    const tipGwei = Number(this.config.execution?.priorityTipGwei || 0);
+    if (tipGwei <= 0) {
+      return {
+        gasPriceWei,
+        maxFeePerGasWei: null,
+        maxPriorityFeePerGasWei: null,
+      };
+    }
+
+    const maxPriorityFeePerGasWei = parseUnits(String(tipGwei), "gwei");
+    const baseMaxFeeWei = fee.maxFeePerGas || gasPriceWei;
+    let maxFeePerGasWei = this.applyMultiplierToWei(baseMaxFeeWei, multiplier);
+    if (maxFeePerGasWei < maxPriorityFeePerGasWei) {
+      maxFeePerGasWei = maxPriorityFeePerGasWei;
+    }
+
+    return {
+      gasPriceWei,
+      maxFeePerGasWei,
+      maxPriorityFeePerGasWei,
+    };
+  }
+
   applyGasMultiplier(gasCostWei) {
     const scaled = Math.round(Number(this.config.risk.gasMultiplier) * 1000);
     return (gasCostWei * BigInt(scaled)) / 1000n;
@@ -77,30 +113,44 @@ class ExecutionEngine {
 
   async buildCastTransaction(spells) {
     const fromAddress = this.resolveExecutionAddress();
-    const gasPriceWei = await this.getGasPriceWei();
+    const gasBid = await this.getExecutionGasBid();
     const txObj = await this.dsa.castTxObj({
       spells,
       from: fromAddress,
-      gasPrice: gasPriceWei.toString(),
+      gasPrice: gasBid.gasPriceWei.toString(),
     });
-    const estimatedGasWei = BigInt(txObj.gas) * BigInt(txObj.gasPrice);
+    const estimatedGasWei = BigInt(txObj.gas) * gasBid.gasPriceWei;
 
     return {
       txObj,
       estimatedGasWei: this.applyGasMultiplier(estimatedGasWei),
+      gasBid,
     };
   }
 
-  toEthersTransaction(txObj, chainId) {
-    return {
+  toEthersTransaction(txObj, chainId, gasBid) {
+    const base = {
       to: txObj.to,
       data: txObj.data,
       value: BigInt(txObj.value || 0),
       gasLimit: BigInt(txObj.gas),
-      gasPrice: BigInt(txObj.gasPrice),
       nonce: Number(txObj.nonce),
       chainId,
+    };
+
+    if (gasBid?.maxFeePerGasWei && gasBid?.maxPriorityFeePerGasWei) {
+      return {
+        ...base,
+        type: 2,
+        maxFeePerGas: gasBid.maxFeePerGasWei,
+        maxPriorityFeePerGas: gasBid.maxPriorityFeePerGasWei,
+      };
+    }
+
+    return {
+      ...base,
       type: 0,
+      gasPrice: gasBid?.gasPriceWei || BigInt(txObj.gasPrice),
     };
   }
 
@@ -140,7 +190,7 @@ class ExecutionEngine {
     }
 
     const spells = this.spellBuilder.buildFlashloanSpell(opportunity);
-    const { txObj, estimatedGasWei } = await this.buildCastTransaction(spells);
+    const { txObj, estimatedGasWei, gasBid } = await this.buildCastTransaction(spells);
     const profitable = await this.validateProfitability(opportunity, estimatedGasWei);
 
     if (!profitable) {
@@ -148,7 +198,7 @@ class ExecutionEngine {
     }
 
     const network = await this.provider.getNetwork();
-    const txRequest = this.toEthersTransaction(txObj, Number(network.chainId));
+    const txRequest = this.toEthersTransaction(txObj, Number(network.chainId), gasBid);
 
     if (this.config.app.dryRun) {
       this.logger.info(

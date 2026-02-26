@@ -100,6 +100,9 @@ npm run dry-run
 npm run start
 ```
 
+For 24/7 autonomous operation, run `npm run start` in a long-lived session
+(tmux/screen/systemd/PM2) so process restarts are managed.
+
 7. Optional: enable a user-friendly dashboard/API:
 
 ```bash
@@ -144,6 +147,25 @@ DSA_ID=<suggestedDsaId from command output>
 
 If `AVOCADO_EXECUTION_ENABLED=true`, execution is routed through Avocado relay mode and
 the direct Flashbots send path is bypassed.
+
+## Execution Priority Controls
+
+You can raise bid aggressiveness via env:
+
+- `GAS_PRICE_MULTIPLIER` (default `1.0`)  
+  multiplies observed gas before tx construction.
+- `PRIORITY_TIP_GWEI` (default `0`)  
+  adds an EIP-1559 priority tip for direct/Flashbots path.
+
+For Avocado execution mode, relay-specific signature options are available:
+
+- `AVOCADO_TX_VALID_UNTIL`
+- `AVOCADO_TX_GAS`
+- `AVOCADO_TX_SOURCE`
+- `AVOCADO_TX_ID`
+
+Note: miner tip controls are strongest on direct EOA/Flashbots path. Avocado relay path
+does not expose full miner-tip control equivalent.
 
 ---
 
