@@ -3,92 +3,295 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Instadapp Searcher Dashboard</title>
+    <title>1st Cursor dApp</title>
     <style>
+      :root {
+        --bg: #040617;
+        --surface: #0f172a;
+        --surface-alt: #111b32;
+        --border: #273245;
+        --text: #dbe7ff;
+        --muted: #9fb1d0;
+        --primary: #60a5fa;
+        --primary-strong: #2563eb;
+        --success: #22c55e;
+        --warn: #f59e0b;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
       body {
         margin: 0;
-        font-family: Arial, sans-serif;
-        background: #0f172a;
-        color: #e2e8f0;
+        font-family:
+          Inter,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+        background: radial-gradient(circle at top, #0b1735 0%, var(--bg) 60%);
+        color: var(--text);
       }
-      main {
-        max-width: 920px;
-        margin: 32px auto;
-        padding: 0 16px;
+
+      .container {
+        max-width: 1060px;
+        margin: 0 auto;
+        padding: 24px 16px 48px;
       }
-      .card {
-        background: #111827;
-        border: 1px solid #1f2937;
-        border-radius: 10px;
-        padding: 16px;
+
+      .hero {
         margin-bottom: 16px;
+        padding: 20px;
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        background: linear-gradient(180deg, #102244 0%, #0e1b34 100%);
       }
-      h1,
+
+      .hero h1 {
+        margin: 0 0 8px;
+        font-size: 30px;
+      }
+
+      .hero p {
+        margin: 0;
+        color: var(--muted);
+      }
+
+      .row {
+        display: grid;
+        gap: 14px;
+      }
+
+      .row.two {
+        grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+      }
+
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 16px;
+      }
+
       h2 {
-        margin-top: 0;
+        margin: 0 0 10px;
+        font-size: 18px;
       }
-      code {
-        background: #1f2937;
-        padding: 2px 6px;
-        border-radius: 6px;
+
+      p {
+        color: var(--muted);
       }
-      pre {
-        white-space: pre-wrap;
-        word-break: break-word;
-        background: #030712;
-        border-radius: 8px;
+
+      .meta {
+        display: grid;
+        gap: 8px;
+      }
+
+      .line {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        padding: 8px 10px;
+        border-radius: 10px;
+        background: #0b1429;
+        border: 1px solid #1f2c44;
+      }
+
+      .line span:last-child {
+        color: #dce9ff;
+        font-family: "SFMono-Regular", Menlo, Monaco, Consolas, monospace;
+        font-size: 13px;
+      }
+
+      .button {
+        border: 1px solid #3b82f6;
+        background: var(--primary-strong);
+        color: white;
+        border-radius: 10px;
+        padding: 10px 14px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      .button:hover {
+        background: #1d4ed8;
+      }
+
+      .button.secondary {
+        border-color: #2d3f61;
+        background: #12203b;
+        color: var(--text);
+      }
+
+      .profile-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+        gap: 10px;
+      }
+
+      .profile-card {
+        background: var(--surface-alt);
+        border: 1px solid #26395b;
+        border-radius: 12px;
         padding: 12px;
       }
-      .ok {
-        color: #22c55e;
+
+      .profile-card h3 {
+        margin: 0 0 8px;
       }
-      .warn {
-        color: #f59e0b;
+
+      .profile-card p {
+        margin: 0 0 8px;
+        min-height: 40px;
+        font-size: 14px;
+      }
+
+      .profile-details {
+        font-size: 12px;
+        color: #adc4eb;
+        margin-bottom: 10px;
+      }
+
+      .profile-card.selected {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 1px var(--primary) inset;
+      }
+
+      .field-row {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 8px;
+      }
+
+      input {
+        width: 100%;
+        background: #0b1429;
+        border: 1px solid #28374f;
+        color: var(--text);
+        border-radius: 10px;
+        padding: 10px 12px;
+      }
+
+      .status {
+        margin-top: 10px;
+        padding: 10px;
+        border-radius: 10px;
+        border: 1px solid #26453a;
+        background: #0c1f1a;
+        color: #9de6bb;
+        display: none;
+      }
+
+      .status.warn {
+        border-color: #5a4122;
+        background: #261b0d;
+        color: #ffce81;
+      }
+
+      pre {
+        margin: 0;
+        background: #071024;
+        border: 1px solid #1d2943;
+        border-radius: 10px;
+        padding: 10px;
+        color: #bfd5ff;
+        overflow-x: auto;
+        min-height: 66px;
+      }
+
+      .green {
+        color: var(--success);
+      }
+
+      .yellow {
+        color: var(--warn);
       }
     </style>
   </head>
   <body>
-    <main>
-      <h1>Instadapp Searcher Bot Dashboard</h1>
-      <div class="card">
-        <h2>Project Vision</h2>
+    <main class="container">
+      <section class="hero">
+        <h1>1st Cursor dApp</h1>
         <p>
-          Build a user-friendly DeFi product where everyday users can connect a wallet, choose risk
-          settings, and use non-custodial strategy vaults powered by automated searchers.
+          Wallet-first onboarding for Instadapp strategy automation: connect, choose profile, and
+          stage a vault deposit.
         </p>
-        <p class="warn">
-          Current status: engine + monitoring + execution backend are live. Consumer vault UI flow is
-          in progress.
+      </section>
+
+      <section class="row two">
+        <article class="card">
+          <h2>Wallet</h2>
+          <div class="meta">
+            <div class="line"><span>Connection</span><span id="wallet-connection">Not connected</span></div>
+            <div class="line"><span>Address</span><span id="wallet-address">-</span></div>
+            <div class="line"><span>Network</span><span id="wallet-network">-</span></div>
+          </div>
+          <div style="margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap">
+            <button class="button" id="connect-wallet-btn">Connect Wallet</button>
+            <button class="button secondary" id="refresh-btn">Refresh Data</button>
+          </div>
+        </article>
+
+        <article class="card">
+          <h2>Engine Status</h2>
+          <div class="line">
+            <span>Health</span>
+            <span id="health"><span class="yellow">Loading...</span></span>
+          </div>
+          <div style="margin-top: 10px">
+            <pre id="status">Loading...</pre>
+          </div>
+        </article>
+      </section>
+
+      <section class="card" style="margin-top: 14px">
+        <h2>Choose Strategy Profile</h2>
+        <p>
+          Select a managed risk profile. Your choice is saved in your browser for the next visit.
         </p>
-      </div>
+        <div id="profiles" class="profile-grid"></div>
+      </section>
 
-      <div class="card">
-        <h2>Health</h2>
-        <p id="health">Loading...</p>
-      </div>
+      <section class="row two" style="margin-top: 14px">
+        <article class="card">
+          <h2>Deposit Intent (Simulation)</h2>
+          <p>This records a local deposit intention and does not send an on-chain transaction yet.</p>
+          <div class="field-row">
+            <input id="deposit-amount" type="number" min="0" step="0.001" placeholder="Amount in ETH" />
+            <button class="button" id="submit-intent-btn">Save Intent</button>
+          </div>
+          <div id="intent-status" class="status"></div>
+        </article>
 
-      <div class="card">
-        <h2>Bot Status</h2>
-        <pre id="status">Loading...</pre>
-      </div>
-
-      <div class="card">
-        <h2>Risk Profiles</h2>
-        <pre id="profiles">Loading...</pre>
-      </div>
-
-      <div class="card">
-        <h2>Quick Start for Users (Managed Mode)</h2>
-        <ol>
-          <li>Connect wallet in the consumer dApp (next phase).</li>
-          <li>Pick a profile: <code>conservative</code>, <code>balanced</code>, or <code>aggressive</code>.</li>
-          <li>Deposit in non-custodial vault contract.</li>
-          <li>Track PnL and withdraw at any time.</li>
-        </ol>
-      </div>
+        <article class="card">
+          <h2>Product Vision</h2>
+          <pre id="vision">Loading...</pre>
+        </article>
+      </section>
     </main>
 
     <script>
+      const STORAGE_KEY = "cursor_dapp_selected_profile";
+      let selectedProfileId = localStorage.getItem(STORAGE_KEY) || null;
+      let profiles = [];
+
+      function shortAddress(address) {
+        if (!address || address.length < 12) return address || "-";
+        return `${address.slice(0, 6)}...${address.slice(-4)}`;
+      }
+
+      function chainName(chainIdHex) {
+        const byId = {
+          "0x1": "Ethereum Mainnet",
+          "0xa4b1": "Arbitrum One",
+          "0x2105": "Base",
+          "0x89": "Polygon",
+          "0xaa36a7": "Sepolia",
+        };
+        return byId[chainIdHex] || `Unknown (${chainIdHex || "n/a"})`;
+      }
+
       async function loadJson(url) {
         const response = await fetch(url);
         if (!response.ok) {
@@ -97,23 +300,124 @@
         return response.json();
       }
 
-      async function refresh() {
-        try {
-          const health = await loadJson("/health");
-          document.getElementById("health").innerHTML = `<span class="ok">ok=${health.ok}</span>`;
+      function showIntentStatus(message, isWarning) {
+        const el = document.getElementById("intent-status");
+        el.textContent = message;
+        el.classList.toggle("warn", Boolean(isWarning));
+        el.style.display = "block";
+      }
 
-          const status = await loadJson("/api/status");
-          document.getElementById("status").textContent = JSON.stringify(status, null, 2);
+      function renderProfiles(list) {
+        const root = document.getElementById("profiles");
+        root.innerHTML = "";
 
-          const profiles = await loadJson("/api/risk-profiles");
-          document.getElementById("profiles").textContent = JSON.stringify(profiles, null, 2);
-        } catch (error) {
-          document.getElementById("health").textContent = `Error: ${error.message}`;
+        if (!Array.isArray(list) || list.length === 0) {
+          root.innerHTML = "<p>No profiles available.</p>";
+          return;
+        }
+
+        for (const profile of list) {
+          const card = document.createElement("article");
+          card.className = "profile-card";
+          if (profile.id === selectedProfileId) {
+            card.classList.add("selected");
+          }
+
+          const detail = `Min profit ${profile.minProfitEth} ETH · Kill switch ${profile.gasKillSwitchEth} ETH`;
+          card.innerHTML = `
+            <h3>${profile.title || profile.name || profile.id}</h3>
+            <p>${profile.summary || "No summary provided."}</p>
+            <div class="profile-details">${detail}</div>
+            <button class="button secondary" type="button">Select ${profile.id}</button>
+          `;
+
+          const button = card.querySelector("button");
+          button.addEventListener("click", () => {
+            selectedProfileId = profile.id;
+            localStorage.setItem(STORAGE_KEY, selectedProfileId);
+            renderProfiles(profiles);
+            showIntentStatus(`Selected "${profile.id}" profile.`, false);
+          });
+
+          root.appendChild(card);
         }
       }
 
-      refresh();
-      setInterval(refresh, 5000);
+      async function refreshBackendData() {
+        const healthEl = document.getElementById("health");
+        const statusEl = document.getElementById("status");
+        const visionEl = document.getElementById("vision");
+
+        try {
+          const [health, status, profileResponse, vision] = await Promise.all([
+            loadJson("/health"),
+            loadJson("/api/status"),
+            loadJson("/api/risk-profiles"),
+            loadJson("/api/vision"),
+          ]);
+
+          healthEl.innerHTML = health.ok
+            ? '<span class="green">online</span>'
+            : '<span class="yellow">degraded</span>';
+          statusEl.textContent = JSON.stringify(status.status, null, 2);
+          profiles = profileResponse.data || [];
+          renderProfiles(profiles);
+          visionEl.textContent = JSON.stringify(vision.data, null, 2);
+        } catch (error) {
+          healthEl.innerHTML = `<span class="yellow">error</span>`;
+          statusEl.textContent = `Could not load API data: ${error.message}`;
+          visionEl.textContent = "Unavailable";
+        }
+      }
+
+      async function connectWallet() {
+        if (!window.ethereum) {
+          showIntentStatus("No injected wallet found. Install MetaMask to connect.", true);
+          return;
+        }
+
+        try {
+          const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+          const chainId = await window.ethereum.request({ method: "eth_chainId" });
+          const first = accounts && accounts[0] ? accounts[0] : null;
+
+          document.getElementById("wallet-connection").textContent = first ? "Connected" : "No account";
+          document.getElementById("wallet-address").textContent = shortAddress(first);
+          document.getElementById("wallet-network").textContent = chainName(chainId);
+        } catch (error) {
+          showIntentStatus(`Wallet connection failed: ${error.message}`, true);
+        }
+      }
+
+      function bindEvents() {
+        document.getElementById("connect-wallet-btn").addEventListener("click", connectWallet);
+        document.getElementById("refresh-btn").addEventListener("click", refreshBackendData);
+        document.getElementById("submit-intent-btn").addEventListener("click", () => {
+          const amountRaw = document.getElementById("deposit-amount").value;
+          const amount = Number(amountRaw);
+          if (!selectedProfileId) {
+            showIntentStatus("Select a strategy profile before saving deposit intent.", true);
+            return;
+          }
+          if (!Number.isFinite(amount) || amount <= 0) {
+            showIntentStatus("Enter a valid deposit amount greater than zero.", true);
+            return;
+          }
+          showIntentStatus(
+            `Saved deposit intent: ${amount.toFixed(3)} ETH with ${selectedProfileId} profile.`,
+            false,
+          );
+        });
+
+        if (window.ethereum && window.ethereum.on) {
+          window.ethereum.on("accountsChanged", connectWallet);
+          window.ethereum.on("chainChanged", connectWallet);
+        }
+      }
+
+      bindEvents();
+      refreshBackendData();
+      setInterval(refreshBackendData, 5000);
     </script>
   </body>
 </html>
