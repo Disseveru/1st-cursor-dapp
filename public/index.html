@@ -307,6 +307,12 @@
         el.style.display = "block";
       }
 
+      function updateWalletDisplay(account, chainId) {
+        document.getElementById("wallet-connection").textContent = account ? "Connected" : "Not connected";
+        document.getElementById("wallet-address").textContent = shortAddress(account);
+        document.getElementById("wallet-network").textContent = chainName(chainId);
+      }
+
       function renderProfiles(list) {
         const root = document.getElementById("profiles");
         root.innerHTML = "";
@@ -370,23 +376,28 @@
         }
       }
 
-      async function connectWallet() {
+      async function syncWalletState({ requestAccess = false } = {}) {
         if (!window.ethereum) {
-          showIntentStatus("No injected wallet found. Install MetaMask to connect.", true);
+          updateWalletDisplay(null, null);
+          document.getElementById("wallet-connection").textContent = "Wallet unavailable";
           return;
         }
 
         try {
-          const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+          const accounts = await window.ethereum.request({
+            method: requestAccess ? "eth_requestAccounts" : "eth_accounts",
+          });
           const chainId = await window.ethereum.request({ method: "eth_chainId" });
           const first = accounts && accounts[0] ? accounts[0] : null;
 
-          document.getElementById("wallet-connection").textContent = first ? "Connected" : "No account";
-          document.getElementById("wallet-address").textContent = shortAddress(first);
-          document.getElementById("wallet-network").textContent = chainName(chainId);
+          updateWalletDisplay(first, chainId);
         } catch (error) {
-          showIntentStatus(`Wallet connection failed: ${error.message}`, true);
+          showIntentStatus(`Wallet sync failed: ${error.message}`, true);
         }
+      }
+
+      async function connectWallet() {
+        await syncWalletState({ requestAccess: true });
       }
 
       function bindEvents() {
@@ -410,12 +421,17 @@
         });
 
         if (window.ethereum && window.ethereum.on) {
-          window.ethereum.on("accountsChanged", connectWallet);
-          window.ethereum.on("chainChanged", connectWallet);
+          window.ethereum.on("accountsChanged", () => {
+            syncWalletState();
+          });
+          window.ethereum.on("chainChanged", () => {
+            syncWalletState();
+          });
         }
       }
 
       bindEvents();
+      syncWalletState();
       refreshBackendData();
       setInterval(refreshBackendData, 5000);
     </script>
