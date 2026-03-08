@@ -103,7 +103,7 @@ async function loadConfig({ logger, cliFlags }) {
     LOG_LEVEL: z.string().default("info"),
     POLL_INTERVAL_MS: z.coerce.number().int().positive().default(2500),
     WEB_PORT: z.coerce.number().int().positive().default(3000),
-    GAS_KILL_SWITCH_ETH: z.coerce.number().positive().default(0.05),
+    GAS_KILL_SWITCH_ETH: z.coerce.number().nonnegative().default(0.05),
     MIN_PROFIT_ETH: z.coerce.number().nonnegative().default(0.002),
     FLASHLOAN_ROUTE: z.coerce.number().int().nonnegative().default(0),
     FLASHBOTS_RELAY_URL: z.string().url().default("https://relay.flashbots.net"),
@@ -120,7 +120,10 @@ async function loadConfig({ logger, cliFlags }) {
     LOG_LEVEL: env.LOG_LEVEL || "info",
     POLL_INTERVAL_MS: env.POLL_INTERVAL_MS || 2500,
     WEB_PORT: env.WEB_PORT || 3000,
-    GAS_KILL_SWITCH_ETH: env.GAS_KILL_SWITCH_ETH || 0.05,
+    GAS_KILL_SWITCH_ETH:
+      env.GAS_KILL_SWITCH_ETH === undefined || env.GAS_KILL_SWITCH_ETH === ""
+        ? 0.05
+        : env.GAS_KILL_SWITCH_ETH,
     MIN_PROFIT_ETH: env.MIN_PROFIT_ETH || 0.002,
     FLASHLOAN_ROUTE: env.FLASHLOAN_ROUTE || 0,
     FLASHBOTS_RELAY_URL: env.FLASHBOTS_RELAY_URL || "https://relay.flashbots.net",
