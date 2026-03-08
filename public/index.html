@@ -3,117 +3,361 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Instadapp Searcher Dashboard</title>
+    <title>Instadapp Searcher Mobile Dashboard</title>
     <style>
+      :root {
+        --bg: #040814;
+        --panel: #0e1628;
+        --panel-soft: #101c33;
+        --text: #e5edf9;
+        --muted: #9fb0cc;
+        --line: #253451;
+        --accent: #60a5fa;
+        --ok: #34d399;
+        --warn: #fbbf24;
+        --danger: #f87171;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
       body {
         margin: 0;
-        font-family: Arial, sans-serif;
-        background: #0f172a;
-        color: #e2e8f0;
+        min-height: 100vh;
+        background: radial-gradient(circle at top, #13213f 0%, var(--bg) 65%);
+        color: var(--text);
+        font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+        font-size: 16px;
+        line-height: 1.45;
       }
-      main {
-        max-width: 920px;
-        margin: 32px auto;
-        padding: 0 16px;
+
+      .shell {
+        width: min(100%, 680px);
+        margin: 0 auto;
+        padding: 16px 14px 24px;
       }
-      .card {
-        background: #111827;
-        border: 1px solid #1f2937;
+
+      .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        margin: -16px -14px 14px;
+        padding: 12px 14px;
+        backdrop-filter: blur(6px);
+        background: rgba(4, 8, 20, 0.82);
+        border-bottom: 1px solid rgba(37, 52, 81, 0.9);
+      }
+
+      h1 {
+        margin: 0;
+        font-size: 1.22rem;
+        letter-spacing: 0.01em;
+      }
+
+      .subtitle {
+        margin: 4px 0 0;
+        color: var(--muted);
+        font-size: 0.93rem;
+      }
+
+      .controls {
+        margin-top: 10px;
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+
+      .chip {
+        border-radius: 999px;
+        border: 1px solid var(--line);
+        padding: 5px 10px;
+        font-size: 0.84rem;
+        color: var(--muted);
+        background: rgba(16, 28, 51, 0.65);
+      }
+
+      .chip.ok {
+        color: #052e23;
+        background: var(--ok);
+        border-color: transparent;
+        font-weight: 700;
+      }
+
+      button {
+        border: 0;
         border-radius: 10px;
-        padding: 16px;
-        margin-bottom: 16px;
+        padding: 11px 14px;
+        min-height: 44px;
+        font-size: 0.95rem;
+        font-weight: 700;
+        background: var(--accent);
+        color: #041226;
       }
-      h1,
+
+      button:active {
+        transform: translateY(1px);
+      }
+
+      .card {
+        background: linear-gradient(180deg, var(--panel) 0%, var(--panel-soft) 100%);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 14px;
+        margin-bottom: 12px;
+      }
+
       h2 {
-        margin-top: 0;
+        margin: 0 0 10px;
+        font-size: 1.02rem;
       }
-      code {
-        background: #1f2937;
-        padding: 2px 6px;
-        border-radius: 6px;
+
+      .kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
       }
-      pre {
-        white-space: pre-wrap;
-        word-break: break-word;
-        background: #030712;
-        border-radius: 8px;
-        padding: 12px;
+
+      .kpi {
+        padding: 10px;
+        border-radius: 10px;
+        border: 1px solid var(--line);
+        background: rgba(3, 9, 20, 0.65);
       }
-      .ok {
-        color: #22c55e;
+
+      .kpi label {
+        display: block;
+        color: var(--muted);
+        font-size: 0.78rem;
+        margin-bottom: 2px;
       }
-      .warn {
-        color: #f59e0b;
+
+      .kpi strong {
+        display: block;
+        font-size: 1rem;
+      }
+
+      .status-message {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+
+      .profiles {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+
+      .profile {
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 11px;
+        background: rgba(3, 9, 20, 0.55);
+      }
+
+      .profile.active {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 1px var(--accent) inset;
+      }
+
+      .profile h3 {
+        margin: 0 0 4px;
+        font-size: 0.98rem;
+      }
+
+      .profile p {
+        margin: 0 0 9px;
+        color: var(--muted);
+        font-size: 0.88rem;
+      }
+
+      .profile button {
+        width: 100%;
+        background: transparent;
+        color: var(--text);
+        border: 1px solid var(--line);
+      }
+
+      .profile.active button {
+        background: var(--accent);
+        color: #041226;
+        border-color: transparent;
+      }
+
+      ol {
+        margin: 0;
+        padding-left: 19px;
+      }
+
+      li {
+        margin-bottom: 6px;
+      }
+
+      .small {
+        margin-top: 9px;
+        color: var(--muted);
+        font-size: 0.8rem;
+      }
+
+      .error {
+        color: var(--danger);
+      }
+
+      @media (min-width: 680px) {
+        .profiles {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
       }
     </style>
   </head>
   <body>
-    <main>
-      <h1>Instadapp Searcher Bot Dashboard</h1>
-      <div class="card">
-        <h2>Project Vision</h2>
-        <p>
-          Build a user-friendly DeFi product where everyday users can connect a wallet, choose risk
-          settings, and use non-custodial strategy vaults powered by automated searchers.
-        </p>
-        <p class="warn">
-          Current status: engine + monitoring + execution backend are live. Consumer vault UI flow is
-          in progress.
-        </p>
-      </div>
+    <main class="shell">
+      <header class="topbar">
+        <h1>Instadapp Searcher Dashboard</h1>
+        <p class="subtitle">Mobile-first control panel for your bot.</p>
+        <div class="controls">
+          <span id="healthChip" class="chip">checking health...</span>
+          <span id="updatedAtChip" class="chip">not synced yet</span>
+          <button id="refreshButton" type="button">Refresh now</button>
+        </div>
+      </header>
 
-      <div class="card">
-        <h2>Health</h2>
-        <p id="health">Loading...</p>
-      </div>
+      <section class="card" aria-live="polite">
+        <h2>Live Status</h2>
+        <div class="kpi-grid">
+          <div class="kpi"><label>Cycles</label><strong id="cycleCount">-</strong></div>
+          <div class="kpi"><label>Found</label><strong id="opportunitiesFound">-</strong></div>
+          <div class="kpi"><label>Executed</label><strong id="opportunitiesExecuted">-</strong></div>
+          <div class="kpi"><label>Retries</label><strong id="retries">-</strong></div>
+          <div class="kpi"><label>Errors</label><strong id="errors">-</strong></div>
+          <div class="kpi"><label>Kill-switch</label><strong id="killSwitchActivated">-</strong></div>
+        </div>
+        <p class="small" id="uptime">Uptime: -</p>
+        <p class="status-message" id="statusMessage">Waiting for first sync...</p>
+      </section>
 
-      <div class="card">
-        <h2>Bot Status</h2>
-        <pre id="status">Loading...</pre>
-      </div>
-
-      <div class="card">
+      <section class="card">
         <h2>Risk Profiles</h2>
-        <pre id="profiles">Loading...</pre>
-      </div>
+        <div id="profiles" class="profiles"></div>
+        <p class="small" id="selectedProfileLabel">No profile selected.</p>
+      </section>
 
-      <div class="card">
-        <h2>Quick Start for Users (Managed Mode)</h2>
+      <section class="card">
+        <h2>What you do on mobile</h2>
         <ol>
-          <li>Connect wallet in the consumer dApp (next phase).</li>
-          <li>Pick a profile: <code>conservative</code>, <code>balanced</code>, or <code>aggressive</code>.</li>
-          <li>Deposit in non-custodial vault contract.</li>
-          <li>Track PnL and withdraw at any time.</li>
+          <li>Open this dashboard from your phone browser.</li>
+          <li>Choose a profile based on your tolerance.</li>
+          <li>Use this view to monitor health, activity, and safety signals.</li>
+          <li>Start with dry-run before running live execution.</li>
         </ol>
-      </div>
+        <p class="small">
+          Tip: save this page to your Android home screen for one-tap access.
+        </p>
+      </section>
     </main>
 
     <script>
+      const state = {
+        selectedProfileId: null,
+      };
+
+      function setText(id, value) {
+        const element = document.getElementById(id);
+        if (element) {
+          element.textContent = value;
+        }
+      }
+
+      function formatDuration(ms) {
+        const sec = Math.floor((Number(ms) || 0) / 1000);
+        const h = Math.floor(sec / 3600);
+        const m = Math.floor((sec % 3600) / 60);
+        const s = sec % 60;
+        return `${h}h ${m}m ${s}s`;
+      }
+
+      function formatDate(value) {
+        if (!value) return "n/a";
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) return "n/a";
+        return date.toLocaleString();
+      }
+
       async function loadJson(url) {
         const response = await fetch(url);
         if (!response.ok) {
-          throw new Error(`${url} failed: ${response.status}`);
+          throw new Error(`${url} failed with ${response.status}`);
         }
         return response.json();
       }
 
-      async function refresh() {
+      function renderProfiles(profiles) {
+        const container = document.getElementById("profiles");
+        container.textContent = "";
+
+        profiles.forEach((profile) => {
+          const card = document.createElement("article");
+          card.className = `profile${state.selectedProfileId === profile.id ? " active" : ""}`;
+          const title = document.createElement("h3");
+          title.textContent = profile.label || profile.id;
+          const desc = document.createElement("p");
+          desc.textContent = profile.description || "No description available.";
+          const button = document.createElement("button");
+          button.type = "button";
+          button.textContent = state.selectedProfileId === profile.id ? "Selected" : "Select profile";
+          button.addEventListener("click", () => {
+            state.selectedProfileId = profile.id;
+            renderProfiles(profiles);
+            setText(
+              "selectedProfileLabel",
+              `Selected: ${profile.label || profile.id} (${profile.id}).`,
+            );
+          });
+          card.append(title, desc, button);
+          container.append(card);
+        });
+      }
+
+      async function refreshDashboard() {
+        const healthChip = document.getElementById("healthChip");
+        const statusMessage = document.getElementById("statusMessage");
         try {
-          const health = await loadJson("/health");
-          document.getElementById("health").innerHTML = `<span class="ok">ok=${health.ok}</span>`;
+          const [health, status, profiles] = await Promise.all([
+            loadJson("/health"),
+            loadJson("/api/status"),
+            loadJson("/api/risk-profiles"),
+          ]);
 
-          const status = await loadJson("/api/status");
-          document.getElementById("status").textContent = JSON.stringify(status, null, 2);
+          healthChip.className = health.ok ? "chip ok" : "chip";
+          healthChip.textContent = health.ok ? "service healthy" : "health degraded";
+          setText("updatedAtChip", `updated ${new Date().toLocaleTimeString()}`);
 
-          const profiles = await loadJson("/api/risk-profiles");
-          document.getElementById("profiles").textContent = JSON.stringify(profiles, null, 2);
+          const data = status.status || {};
+          setText("cycleCount", String(data.cycleCount ?? 0));
+          setText("opportunitiesFound", String(data.opportunitiesFound ?? 0));
+          setText("opportunitiesExecuted", String(data.opportunitiesExecuted ?? 0));
+          setText("retries", String(data.retries ?? 0));
+          setText("errors", String(data.errors ?? 0));
+          setText("killSwitchActivated", data.killSwitchActivated ? "ON" : "OFF");
+          setText("uptime", `Uptime: ${formatDuration(data.uptimeMs)}`);
+          statusMessage.textContent = `Last cycle: ${formatDate(data.lastCycleAt)} | Last execution: ${formatDate(data.lastExecutionAt)}`;
+          statusMessage.className = "status-message";
+
+          renderProfiles(profiles.data || []);
         } catch (error) {
-          document.getElementById("health").textContent = `Error: ${error.message}`;
+          healthChip.className = "chip";
+          healthChip.textContent = "sync failed";
+          setText("updatedAtChip", "retrying...");
+          statusMessage.textContent = `Unable to load dashboard data: ${error.message}`;
+          statusMessage.className = "status-message error";
         }
       }
 
-      refresh();
-      setInterval(refresh, 5000);
+      document.getElementById("refreshButton").addEventListener("click", refreshDashboard);
+      refreshDashboard();
+      setInterval(refreshDashboard, 10000);
     </script>
   </body>
 </html>
