@@ -3,19 +3,19 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>1st Cursor dApp</title>
+    <title>Instadapp Searcher Mobile Dashboard</title>
     <style>
       :root {
-        --bg: #040617;
-        --surface: #0f172a;
-        --surface-alt: #111b32;
-        --border: #273245;
-        --text: #dbe7ff;
-        --muted: #9fb1d0;
-        --primary: #60a5fa;
-        --primary-strong: #2563eb;
-        --success: #22c55e;
-        --warn: #f59e0b;
+        --bg: #040814;
+        --panel: #0e1628;
+        --panel-soft: #101c33;
+        --text: #e5edf9;
+        --muted: #9fb0cc;
+        --line: #253451;
+        --accent: #60a5fa;
+        --ok: #34d399;
+        --warn: #fbbf24;
+        --danger: #f87171;
       }
 
       * {
@@ -24,400 +24,340 @@
 
       body {
         margin: 0;
-        font-family:
-          Inter,
-          -apple-system,
-          BlinkMacSystemFont,
-          "Segoe UI",
-          sans-serif;
-        background: radial-gradient(circle at top, #0b1735 0%, var(--bg) 60%);
+        min-height: 100vh;
+        background: radial-gradient(circle at top, #13213f 0%, var(--bg) 65%);
         color: var(--text);
+        font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+        font-size: 16px;
+        line-height: 1.45;
       }
 
-      .container {
-        max-width: 1060px;
+      .shell {
+        width: min(100%, 680px);
         margin: 0 auto;
-        padding: 24px 16px 48px;
+        padding: 16px 14px 24px;
       }
 
-      .hero {
-        margin-bottom: 16px;
-        padding: 20px;
-        border: 1px solid var(--border);
-        border-radius: 16px;
-        background: linear-gradient(180deg, #102244 0%, #0e1b34 100%);
+      .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        margin: -16px -14px 14px;
+        padding: 12px 14px;
+        backdrop-filter: blur(6px);
+        background: rgba(4, 8, 20, 0.82);
+        border-bottom: 1px solid rgba(37, 52, 81, 0.9);
       }
 
-      .hero h1 {
-        margin: 0 0 8px;
-        font-size: 30px;
-      }
-
-      .hero p {
+      h1 {
         margin: 0;
+        font-size: 1.22rem;
+        letter-spacing: 0.01em;
+      }
+
+      .subtitle {
+        margin: 4px 0 0;
         color: var(--muted);
+        font-size: 0.93rem;
       }
 
-      .row {
-        display: grid;
-        gap: 14px;
+      .controls {
+        margin-top: 10px;
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        align-items: center;
       }
 
-      .row.two {
-        grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+      .chip {
+        border-radius: 999px;
+        border: 1px solid var(--line);
+        padding: 5px 10px;
+        font-size: 0.84rem;
+        color: var(--muted);
+        background: rgba(16, 28, 51, 0.65);
+      }
+
+      .chip.ok {
+        color: #052e23;
+        background: var(--ok);
+        border-color: transparent;
+        font-weight: 700;
+      }
+
+      button {
+        border: 0;
+        border-radius: 10px;
+        padding: 11px 14px;
+        min-height: 44px;
+        font-size: 0.95rem;
+        font-weight: 700;
+        background: var(--accent);
+        color: #041226;
+      }
+
+      button:active {
+        transform: translateY(1px);
       }
 
       .card {
-        background: var(--surface);
-        border: 1px solid var(--border);
+        background: linear-gradient(180deg, var(--panel) 0%, var(--panel-soft) 100%);
+        border: 1px solid var(--line);
         border-radius: 14px;
-        padding: 16px;
+        padding: 14px;
+        margin-bottom: 12px;
       }
 
       h2 {
         margin: 0 0 10px;
-        font-size: 18px;
+        font-size: 1.02rem;
       }
 
-      p {
+      .kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+      }
+
+      .kpi {
+        padding: 10px;
+        border-radius: 10px;
+        border: 1px solid var(--line);
+        background: rgba(3, 9, 20, 0.65);
+      }
+
+      .kpi label {
+        display: block;
         color: var(--muted);
+        font-size: 0.78rem;
+        margin-bottom: 2px;
       }
 
-      .meta {
-        display: grid;
-        gap: 8px;
+      .kpi strong {
+        display: block;
+        font-size: 1rem;
       }
 
-      .line {
-        display: flex;
-        justify-content: space-between;
-        gap: 8px;
-        padding: 8px 10px;
-        border-radius: 10px;
-        background: #0b1429;
-        border: 1px solid #1f2c44;
-      }
-
-      .line span:last-child {
-        color: #dce9ff;
-        font-family: "SFMono-Regular", Menlo, Monaco, Consolas, monospace;
-        font-size: 13px;
-      }
-
-      .button {
-        border: 1px solid #3b82f6;
-        background: var(--primary-strong);
-        color: white;
-        border-radius: 10px;
-        padding: 10px 14px;
-        font-weight: 600;
-        cursor: pointer;
-      }
-
-      .button:hover {
-        background: #1d4ed8;
-      }
-
-      .button.secondary {
-        border-color: #2d3f61;
-        background: #12203b;
-        color: var(--text);
-      }
-
-      .profile-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-        gap: 10px;
-      }
-
-      .profile-card {
-        background: var(--surface-alt);
-        border: 1px solid #26395b;
-        border-radius: 12px;
-        padding: 12px;
-      }
-
-      .profile-card h3 {
-        margin: 0 0 8px;
-      }
-
-      .profile-card p {
-        margin: 0 0 8px;
-        min-height: 40px;
-        font-size: 14px;
-      }
-
-      .profile-details {
-        font-size: 12px;
-        color: #adc4eb;
-        margin-bottom: 10px;
-      }
-
-      .profile-card.selected {
-        border-color: var(--primary);
-        box-shadow: 0 0 0 1px var(--primary) inset;
-      }
-
-      .field-row {
-        display: grid;
-        grid-template-columns: 1fr auto;
-        gap: 8px;
-      }
-
-      input {
-        width: 100%;
-        background: #0b1429;
-        border: 1px solid #28374f;
-        color: var(--text);
-        border-radius: 10px;
-        padding: 10px 12px;
-      }
-
-      .status {
-        margin-top: 10px;
-        padding: 10px;
-        border-radius: 10px;
-        border: 1px solid #26453a;
-        background: #0c1f1a;
-        color: #9de6bb;
-        display: none;
-      }
-
-      .status.warn {
-        border-color: #5a4122;
-        background: #261b0d;
-        color: #ffce81;
-      }
-
-      pre {
+      .status-message {
         margin: 0;
-        background: #071024;
-        border: 1px solid #1d2943;
-        border-radius: 10px;
-        padding: 10px;
-        color: #bfd5ff;
-        overflow-x: auto;
-        min-height: 66px;
+        color: var(--muted);
+        font-size: 0.9rem;
       }
 
-      .green {
-        color: var(--success);
+      .profiles {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 8px;
       }
 
-      .yellow {
-        color: var(--warn);
+      .profile {
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 11px;
+        background: rgba(3, 9, 20, 0.55);
+      }
+
+      .profile.active {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 1px var(--accent) inset;
+      }
+
+      .profile h3 {
+        margin: 0 0 4px;
+        font-size: 0.98rem;
+      }
+
+      .profile p {
+        margin: 0 0 9px;
+        color: var(--muted);
+        font-size: 0.88rem;
+      }
+
+      .profile button {
+        width: 100%;
+        background: transparent;
+        color: var(--text);
+        border: 1px solid var(--line);
+      }
+
+      .profile.active button {
+        background: var(--accent);
+        color: #041226;
+        border-color: transparent;
+      }
+
+      ol {
+        margin: 0;
+        padding-left: 19px;
+      }
+
+      li {
+        margin-bottom: 6px;
+      }
+
+      .small {
+        margin-top: 9px;
+        color: var(--muted);
+        font-size: 0.8rem;
+      }
+
+      .error {
+        color: var(--danger);
+      }
+
+      @media (min-width: 680px) {
+        .profiles {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
       }
     </style>
   </head>
   <body>
-    <main class="container">
-      <section class="hero">
-        <h1>1st Cursor dApp</h1>
-        <p>
-          Wallet-first onboarding for Instadapp strategy automation: connect, choose profile, and
-          stage a vault deposit.
+    <main class="shell">
+      <header class="topbar">
+        <h1>Instadapp Searcher Dashboard</h1>
+        <p class="subtitle">Mobile-first control panel for your bot.</p>
+        <div class="controls">
+          <span id="healthChip" class="chip">checking health...</span>
+          <span id="updatedAtChip" class="chip">not synced yet</span>
+          <button id="refreshButton" type="button">Refresh now</button>
+        </div>
+      </header>
+
+      <section class="card" aria-live="polite">
+        <h2>Live Status</h2>
+        <div class="kpi-grid">
+          <div class="kpi"><label>Cycles</label><strong id="cycleCount">-</strong></div>
+          <div class="kpi"><label>Found</label><strong id="opportunitiesFound">-</strong></div>
+          <div class="kpi"><label>Executed</label><strong id="opportunitiesExecuted">-</strong></div>
+          <div class="kpi"><label>Retries</label><strong id="retries">-</strong></div>
+          <div class="kpi"><label>Errors</label><strong id="errors">-</strong></div>
+          <div class="kpi"><label>Kill-switch</label><strong id="killSwitchActivated">-</strong></div>
+        </div>
+        <p class="small" id="uptime">Uptime: -</p>
+        <p class="status-message" id="statusMessage">Waiting for first sync...</p>
+      </section>
+
+      <section class="card">
+        <h2>Risk Profiles</h2>
+        <div id="profiles" class="profiles"></div>
+        <p class="small" id="selectedProfileLabel">No profile selected.</p>
+      </section>
+
+      <section class="card">
+        <h2>What you do on mobile</h2>
+        <ol>
+          <li>Open this dashboard from your phone browser.</li>
+          <li>Choose a profile based on your tolerance.</li>
+          <li>Use this view to monitor health, activity, and safety signals.</li>
+          <li>Start with dry-run before running live execution.</li>
+        </ol>
+        <p class="small">
+          Tip: save this page to your Android home screen for one-tap access.
         </p>
-      </section>
-
-      <section class="row two">
-        <article class="card">
-          <h2>Wallet</h2>
-          <div class="meta">
-            <div class="line"><span>Connection</span><span id="wallet-connection">Not connected</span></div>
-            <div class="line"><span>Address</span><span id="wallet-address">-</span></div>
-            <div class="line"><span>Network</span><span id="wallet-network">-</span></div>
-          </div>
-          <div style="margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap">
-            <button class="button" id="connect-wallet-btn">Connect Wallet</button>
-            <button class="button secondary" id="refresh-btn">Refresh Data</button>
-          </div>
-        </article>
-
-        <article class="card">
-          <h2>Engine Status</h2>
-          <div class="line">
-            <span>Health</span>
-            <span id="health"><span class="yellow">Loading...</span></span>
-          </div>
-          <div style="margin-top: 10px">
-            <pre id="status">Loading...</pre>
-          </div>
-        </article>
-      </section>
-
-      <section class="card" style="margin-top: 14px">
-        <h2>Choose Strategy Profile</h2>
-        <p>
-          Select a managed risk profile. Your choice is saved in your browser for the next visit.
-        </p>
-        <div id="profiles" class="profile-grid"></div>
-      </section>
-
-      <section class="row two" style="margin-top: 14px">
-        <article class="card">
-          <h2>Deposit Intent (Simulation)</h2>
-          <p>This records a local deposit intention and does not send an on-chain transaction yet.</p>
-          <div class="field-row">
-            <input id="deposit-amount" type="number" min="0" step="0.001" placeholder="Amount in ETH" />
-            <button class="button" id="submit-intent-btn">Save Intent</button>
-          </div>
-          <div id="intent-status" class="status"></div>
-        </article>
-
-        <article class="card">
-          <h2>Product Vision</h2>
-          <pre id="vision">Loading...</pre>
-        </article>
       </section>
     </main>
 
     <script>
-      const STORAGE_KEY = "cursor_dapp_selected_profile";
-      let selectedProfileId = localStorage.getItem(STORAGE_KEY) || null;
-      let profiles = [];
+      const state = {
+        selectedProfileId: null,
+      };
 
-      function shortAddress(address) {
-        if (!address || address.length < 12) return address || "-";
-        return `${address.slice(0, 6)}...${address.slice(-4)}`;
+      function setText(id, value) {
+        const element = document.getElementById(id);
+        if (element) {
+          element.textContent = value;
+        }
       }
 
-      function chainName(chainIdHex) {
-        const byId = {
-          "0x1": "Ethereum Mainnet",
-          "0xa4b1": "Arbitrum One",
-          "0x2105": "Base",
-          "0x89": "Polygon",
-          "0xaa36a7": "Sepolia",
-        };
-        return byId[chainIdHex] || `Unknown (${chainIdHex || "n/a"})`;
+      function formatDuration(ms) {
+        const sec = Math.floor((Number(ms) || 0) / 1000);
+        const h = Math.floor(sec / 3600);
+        const m = Math.floor((sec % 3600) / 60);
+        const s = sec % 60;
+        return `${h}h ${m}m ${s}s`;
+      }
+
+      function formatDate(value) {
+        if (!value) return "n/a";
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) return "n/a";
+        return date.toLocaleString();
       }
 
       async function loadJson(url) {
         const response = await fetch(url);
         if (!response.ok) {
-          throw new Error(`${url} failed: ${response.status}`);
+          throw new Error(`${url} failed with ${response.status}`);
         }
         return response.json();
       }
 
-      function showIntentStatus(message, isWarning) {
-        const el = document.getElementById("intent-status");
-        el.textContent = message;
-        el.classList.toggle("warn", Boolean(isWarning));
-        el.style.display = "block";
-      }
+      function renderProfiles(profiles) {
+        const container = document.getElementById("profiles");
+        container.textContent = "";
 
-      function renderProfiles(list) {
-        const root = document.getElementById("profiles");
-        root.innerHTML = "";
-
-        if (!Array.isArray(list) || list.length === 0) {
-          root.innerHTML = "<p>No profiles available.</p>";
-          return;
-        }
-
-        for (const profile of list) {
+        profiles.forEach((profile) => {
           const card = document.createElement("article");
-          card.className = "profile-card";
-          if (profile.id === selectedProfileId) {
-            card.classList.add("selected");
-          }
-
-          const detail = `Min profit ${profile.minProfitEth} ETH · Kill switch ${profile.gasKillSwitchEth} ETH`;
-          card.innerHTML = `
-            <h3>${profile.title || profile.name || profile.id}</h3>
-            <p>${profile.summary || "No summary provided."}</p>
-            <div class="profile-details">${detail}</div>
-            <button class="button secondary" type="button">Select ${profile.id}</button>
-          `;
-
-          const button = card.querySelector("button");
+          card.className = `profile${state.selectedProfileId === profile.id ? " active" : ""}`;
+          const title = document.createElement("h3");
+          title.textContent = profile.label || profile.id;
+          const desc = document.createElement("p");
+          desc.textContent = profile.description || "No description available.";
+          const button = document.createElement("button");
+          button.type = "button";
+          button.textContent = state.selectedProfileId === profile.id ? "Selected" : "Select profile";
           button.addEventListener("click", () => {
-            selectedProfileId = profile.id;
-            localStorage.setItem(STORAGE_KEY, selectedProfileId);
+            state.selectedProfileId = profile.id;
             renderProfiles(profiles);
-            showIntentStatus(`Selected "${profile.id}" profile.`, false);
+            setText(
+              "selectedProfileLabel",
+              `Selected: ${profile.label || profile.id} (${profile.id}).`,
+            );
           });
-
-          root.appendChild(card);
-        }
+          card.append(title, desc, button);
+          container.append(card);
+        });
       }
 
-      async function refreshBackendData() {
-        const healthEl = document.getElementById("health");
-        const statusEl = document.getElementById("status");
-        const visionEl = document.getElementById("vision");
-
+      async function refreshDashboard() {
+        const healthChip = document.getElementById("healthChip");
+        const statusMessage = document.getElementById("statusMessage");
         try {
-          const [health, status, profileResponse, vision] = await Promise.all([
+          const [health, status, profiles] = await Promise.all([
             loadJson("/health"),
             loadJson("/api/status"),
             loadJson("/api/risk-profiles"),
-            loadJson("/api/vision"),
           ]);
 
-          healthEl.innerHTML = health.ok
-            ? '<span class="green">online</span>'
-            : '<span class="yellow">degraded</span>';
-          statusEl.textContent = JSON.stringify(status.status, null, 2);
-          profiles = profileResponse.data || [];
-          renderProfiles(profiles);
-          visionEl.textContent = JSON.stringify(vision.data, null, 2);
+          healthChip.className = health.ok ? "chip ok" : "chip";
+          healthChip.textContent = health.ok ? "service healthy" : "health degraded";
+          setText("updatedAtChip", `updated ${new Date().toLocaleTimeString()}`);
+
+          const data = status.status || {};
+          setText("cycleCount", String(data.cycleCount ?? 0));
+          setText("opportunitiesFound", String(data.opportunitiesFound ?? 0));
+          setText("opportunitiesExecuted", String(data.opportunitiesExecuted ?? 0));
+          setText("retries", String(data.retries ?? 0));
+          setText("errors", String(data.errors ?? 0));
+          setText("killSwitchActivated", data.killSwitchActivated ? "ON" : "OFF");
+          setText("uptime", `Uptime: ${formatDuration(data.uptimeMs)}`);
+          statusMessage.textContent = `Last cycle: ${formatDate(data.lastCycleAt)} | Last execution: ${formatDate(data.lastExecutionAt)}`;
+          statusMessage.className = "status-message";
+
+          renderProfiles(profiles.data || []);
         } catch (error) {
-          healthEl.innerHTML = `<span class="yellow">error</span>`;
-          statusEl.textContent = `Could not load API data: ${error.message}`;
-          visionEl.textContent = "Unavailable";
+          healthChip.className = "chip";
+          healthChip.textContent = "sync failed";
+          setText("updatedAtChip", "retrying...");
+          statusMessage.textContent = `Unable to load dashboard data: ${error.message}`;
+          statusMessage.className = "status-message error";
         }
       }
 
-      async function connectWallet() {
-        if (!window.ethereum) {
-          showIntentStatus("No injected wallet found. Install MetaMask to connect.", true);
-          return;
-        }
-
-        try {
-          const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
-          const chainId = await window.ethereum.request({ method: "eth_chainId" });
-          const first = accounts && accounts[0] ? accounts[0] : null;
-
-          document.getElementById("wallet-connection").textContent = first ? "Connected" : "No account";
-          document.getElementById("wallet-address").textContent = shortAddress(first);
-          document.getElementById("wallet-network").textContent = chainName(chainId);
-        } catch (error) {
-          showIntentStatus(`Wallet connection failed: ${error.message}`, true);
-        }
-      }
-
-      function bindEvents() {
-        document.getElementById("connect-wallet-btn").addEventListener("click", connectWallet);
-        document.getElementById("refresh-btn").addEventListener("click", refreshBackendData);
-        document.getElementById("submit-intent-btn").addEventListener("click", () => {
-          const amountRaw = document.getElementById("deposit-amount").value;
-          const amount = Number(amountRaw);
-          if (!selectedProfileId) {
-            showIntentStatus("Select a strategy profile before saving deposit intent.", true);
-            return;
-          }
-          if (!Number.isFinite(amount) || amount <= 0) {
-            showIntentStatus("Enter a valid deposit amount greater than zero.", true);
-            return;
-          }
-          showIntentStatus(
-            `Saved deposit intent: ${amount.toFixed(3)} ETH with ${selectedProfileId} profile.`,
-            false,
-          );
-        });
-
-        if (window.ethereum && window.ethereum.on) {
-          window.ethereum.on("accountsChanged", connectWallet);
-          window.ethereum.on("chainChanged", connectWallet);
-        }
-      }
-
-      bindEvents();
-      refreshBackendData();
-      setInterval(refreshBackendData, 5000);
+      document.getElementById("refreshButton").addEventListener("click", refreshDashboard);
+      refreshDashboard();
+      setInterval(refreshDashboard, 10000);
     </script>
   </body>
 </html>
