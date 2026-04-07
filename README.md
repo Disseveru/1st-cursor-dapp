@@ -69,7 +69,8 @@ npm run setup
 ```
 
 The wizard will prompt you for the key values (DSA ID, RPC URL, private key, etc.)
-and write a `.env` file with correct permissions (`0600`).
+and write a `.env` file for you. If `.env` already exists, verify its permissions and
+set them to `0600` manually if needed.
 
 Alternatively, copy the template manually and edit it:
 
