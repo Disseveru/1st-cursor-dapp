@@ -21,18 +21,6 @@ function ask(rl, question) {
   return new Promise((resolve) => rl.question(question, (ans) => resolve(ans)));
 }
 
-async function askSecret(rl, question) {
-  // Node's readline doesn't have built-in masking; we print a note instead.
-  process.stdout.write(`${question} [input hidden in some terminals]: `);
-  return new Promise((resolve) => {
-    process.stdin.once("data", (chunk) => {
-      const value = chunk.toString().trim();
-      process.stdout.write("\n");
-      resolve(value);
-    });
-  });
-}
-
 async function confirm(rl, question, defaultYes = true) {
   const hint = defaultYes ? "[Y/n]" : "[y/N]";
   const answer = await ask(rl, `${question} ${hint}: `);
@@ -181,12 +169,13 @@ async function main() {
     terminal: true,
   });
 
-  // Pause stdin so we can read raw bytes for secret prompts.
-  process.stdin.setEncoding("utf8");
-
   console.log("\n======================================================");
   console.log("   Instadapp Searcher Bot  –  .env setup wizard");
   console.log("======================================================\n");
+  console.log("Note: secret values (private keys, passphrases) are entered via this prompt");
+  console.log("      and will be visible in the terminal. For better security, set them as");
+  console.log("      environment variables before running this script (e.g. PRIVATE_KEY=0x...)");
+  console.log("      and they will be picked up automatically.\n");
 
   // ── check for existing .env ────────────────────────────────────────────────
   if (fs.existsSync(OUTPUT_PATH)) {
@@ -205,7 +194,7 @@ async function main() {
   // ── collect values ─────────────────────────────────────────────────────────
   const collected = {}; // name -> value entered by user
 
-  console.log("Answer each prompt. Press Enter to keep the default shown in [brackets].");
+  console.log("Answer each prompt. Press Enter to keep the default shown in brackets.");
   console.log("Leave required fields blank to be warned (you can still edit .env manually).\n");
 
   // Which variables we've already asked about (avoids duplicate prompts for
@@ -228,29 +217,29 @@ async function main() {
     const required = meta.required;
     const isSecret = meta.secret === true;
 
+    // If the secret was pre-set in the environment, use it silently.
+    if (isSecret && process.env[name]) {
+      console.log(`  Using ${name} from environment variable.`);
+      collected[name] = process.env[name];
+      console.log("");
+      continue;
+    }
+
     let promptLine = `${required ? "*" : " "} ${label}`;
     if (meta.hint) promptLine += `\n    (${meta.hint})`;
-    if (!isSecret && defaultValue) promptLine += `\n    default: ${defaultValue}`;
+    if (defaultValue) promptLine += `\n    default: ${defaultValue}`;
     promptLine += "\n  > ";
 
-    // For secrets we use the raw-input path.
-    let entered;
-    if (isSecret) {
-      entered = await askSecret(rl, promptLine.trimEnd());
-    } else {
-      entered = await ask(rl, promptLine);
-    }
+    const entered = await ask(rl, promptLine);
 
     // Use example default if nothing was entered.
-    if (!entered.trim() && !isSecret) {
-      entered = defaultValue;
-    }
+    const value = entered.trim() || defaultValue;
 
-    if (required && !entered.trim()) {
+    if (required && !value.trim()) {
       console.warn(`  ⚠  WARNING: ${name} is required but was left blank.`);
     }
 
-    collected[name] = entered.trim();
+    collected[name] = value.trim();
     console.log("");
   }
 
@@ -309,6 +298,6 @@ async function main() {
 }
 
 main().catch((err) => {
-  console.error("setup-env failed:", err.message);
+  console.error("setup-env failed:", err);
   process.exit(1);
 });
