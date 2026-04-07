@@ -62,7 +62,16 @@ npm run encrypt:key
 npm install
 ```
 
-2. Copy env template:
+2. Run the interactive setup wizard to create your `.env`:
+
+```bash
+npm run setup
+```
+
+The wizard will prompt you for the key values (DSA ID, RPC URL, private key, etc.)
+and write a `.env` file with correct permissions (`0600`).
+
+Alternatively, copy the template manually and edit it:
 
 ```bash
 cp .env.example .env
