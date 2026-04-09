@@ -1,0 +1,6 @@
+interface:
+  display_name: "1st Cursor Dapp"
+  short_description: "Repo-specific patterns and workflows for 1st-cursor-dapp"
+  default_prompt: "Use the 1st-cursor-dapp repo skill to follow existing architecture, testing, and workflow conventions."
+policy:
+  allow_implicit_invocation: true
